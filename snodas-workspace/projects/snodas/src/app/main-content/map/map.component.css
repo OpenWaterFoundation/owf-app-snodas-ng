@@ -1,0 +1,33 @@
+/* TAGS */
+
+div#mapID {
+  height: calc(100vh - 70px);
+  width: auto;
+}
+
+/* CLASSES */
+
+/* Not currently working */
+div.info-legend {
+  padding: 6px 8px;
+  font: 14px/16px Arial, Helvetica, sans-serif;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Not currently working */
+.leaflet-control-mouseposition {
+  margin: 0px 10px 10px 0px !important;
+}
+
+/* Begin displaying the .main-container right after the navigation toolbar ends. */
+.main-container {
+  margin-top: 70px;
+}
+
+/* ID's */
+
+#drawer {
+  background-color: #e2e2e2;
+  width: 300px;
+}

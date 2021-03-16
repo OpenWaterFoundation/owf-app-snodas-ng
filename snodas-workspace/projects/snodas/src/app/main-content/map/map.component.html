@@ -1,0 +1,17 @@
+<mat-drawer-container class="main-container">
+
+  <mat-drawer id="drawer"
+              mode="side"
+              position="end"
+              opened>
+    <div *ngIf="currentDateDisplay">
+      <app-side-nav [currentDateDisplay]="currentDateDisplay"></app-side-nav>
+    </div>
+
+  </mat-drawer>
+
+  <mat-drawer-content>
+    <div id="mapID"></div>
+  </mat-drawer-content>
+
+</mat-drawer-container>

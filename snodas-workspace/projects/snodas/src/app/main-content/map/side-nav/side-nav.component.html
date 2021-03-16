@@ -1,0 +1,58 @@
+<div id="main">
+
+  <mat-form-field id="select-date-form" appearance="fill">
+    <mat-label>Select Date</mat-label>
+    <mat-select [(ngModel)]="selectedDate" name="date-selection">
+      <input matInput (keyup)="userInput($event.target.value)">
+      <mat-option *ngFor="let date of selectedDates">
+        {{date}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <h3><u>Current SNODAS Date</u></h3>
+  <span id="current-date-display">{{currentDateDisplay}}</span>
+
+  <hr><!-- Divider between the Select Date Form Field dropdown and the SNODAS animation Form Field -->
+
+  <h3><u>SNODAS Animation</u></h3>
+
+  <div id="date-picker">
+    <mat-form-field id="date-picker-form" appearance="fill">
+
+      <mat-label>Enter a date range</mat-label>
+      <mat-date-range-input [rangePicker]="picker" [min]="minDate" [max]="maxDate">
+        <input matStartDate placeholder="Start date">
+        <input matEndDate placeholder="End date">
+      </mat-date-range-input>
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker #picker [startAt]="minDate"></mat-date-range-picker>
+
+    </mat-form-field>
+  </div>
+
+  <div id="day-increment">
+    <mat-form-field id="day-increment-form">
+      <mat-label>Increment in days</mat-label>
+      <input matInput value="1">
+    </mat-form-field>
+  </div>
+
+  <button mat-raised-button
+          id="select-date">
+    Submit
+  </button>
+
+  <hr>
+
+  <mat-form-field id="select-date-form" appearance="fill">
+    <mat-label>Select Basin</mat-label>
+    <mat-select [(ngModel)]="selectedDate" name="basin-selection">
+      <input matInput (keyup)="userInput($event.target.value)">
+      <mat-option *ngFor="let basin of allBasins">
+        {{basin}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  
+</div>

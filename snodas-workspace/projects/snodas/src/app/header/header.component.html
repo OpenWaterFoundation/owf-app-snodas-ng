@@ -1,0 +1,47 @@
+<!-- Toolbar -->
+<nav class="toolbar">
+
+  <!-- Angular Dev App -->
+  <button mat-button
+          id="navbar-title"
+          routerLink="/dashboard">
+    <span>SNODAS Tools</span>
+  </button>
+  <!-- Main map -->
+  <button mat-button
+          id="navbar-button"
+          matTooltip="Click to view dashboard map"
+          [matTooltipShowDelay]="750"
+          matTooltipPosition="left"
+          [routerLink]="['/dashboard']"
+          routerLinkActive="link-active">
+    <span>Map</span>
+  </button>
+  <!-- About Section -->
+  <button mat-button
+          id="navbar-button"
+          matTooltip="Click to view SNODAS information"
+          [matTooltipShowDelay]="750"
+          matTooltipPosition="left"
+          [routerLink]="['about']"
+          routerLinkActive="link-active">
+    <span>About</span>
+  </button>
+  <!-- Data Section -->
+  <button mat-button
+          id="navbar-button"
+          [disabled]="true">
+    <span>Data</span>
+  </button>
+  <!-- Documentation Section -->
+  <button mat-button
+          id="navbar-button"
+          matTooltip="Click to view SNODAS documentation"
+          [matTooltipShowDelay]="750"
+          matTooltipPosition="left"
+          [routerLink]="['docs']"
+          routerLinkActive="link-active">
+    <span>Documentation</span>
+  </button>
+
+</nav>

@@ -1,0 +1,41 @@
+/* TAGS */
+
+/* The clickable Angular Dev App button to display the application name and provide a path back to the home page. */
+button#navbar-title {
+  color: #333;
+  font-size: x-large;
+  height: 100%;
+  padding: 0.50rem 1rem 0.5rem 1rem;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* Broad styling guide for each of the clickable navbar buttons. */
+button#navbar-button {
+  height: 100%;
+  font-size: 16px;
+}
+
+/* CLASSES */
+
+.content {
+  display: flex;
+  margin: 82px auto 32px;
+  padding: 0 16px;
+  max-width: 960px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.toolbar {
+  border-top: #9db66b 5px solid;
+  border-bottom: #e9eaee 5px solid;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  color: black;
+}

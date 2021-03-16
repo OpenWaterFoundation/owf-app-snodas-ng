@@ -1,0 +1,135 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1, 
+  "newProjectRoot": "projects",
+  "projects": {
+    "snodas": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "projects/snodas",
+      "sourceRoot": "projects/snodas/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "allowedCommonJsDependencies": [
+              "papaparse"
+            ],
+            "outputPath": "dist/snodas",
+            "index": "projects/snodas/src/index.html",
+            "main": "projects/snodas/src/main.ts",
+            "polyfills": "projects/snodas/src/polyfills.ts",
+            "tsConfig": "projects/snodas/tsconfig.app.json",
+            "aot": true,
+            "assets": [
+              "projects/snodas/src/favicon.ico",
+              "projects/snodas/src/assets"
+            ],
+            "styles": [
+              "projects/snodas/src/styles.css",
+              "node_modules/leaflet/dist/leaflet.css",
+              "node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",
+              "node_modules/font-awesome/css/font-awesome.css",
+              "node_modules/leaflet.zoomhome/src/css/leaflet.zoomhome.css",
+              "node_modules/leaflet-mouse-position/src/L.Control.MousePosition.css"
+            ],
+            "scripts": [
+              "node_modules/leaflet/dist/leaflet.js",
+              "node_modules/leaflet.zoomhome/dist/leaflet.zoomhome.js",
+              "node_modules/leaflet-mouse-position/src/L.Control.MousePosition.js"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "projects/snodas/src/environments/environment.ts",
+                  "with": "projects/snodas/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "snodas:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "snodas:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "snodas:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/snodas/src/test.ts",
+            "polyfills": "projects/snodas/src/polyfills.ts",
+            "tsConfig": "projects/snodas/tsconfig.spec.json",
+            "karmaConfig": "projects/snodas/karma.conf.js",
+            "assets": [
+              "projects/snodas/src/favicon.ico",
+              "projects/snodas/src/assets"
+            ],
+            "styles": [
+              "projects/snodas/src/styles.css"
+            ],
+            "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/snodas/tsconfig.app.json",
+              "projects/snodas/tsconfig.spec.json",
+              "projects/snodas/e2e/tsconfig.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        },
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "projects/snodas/e2e/protractor.conf.js",
+            "devServerTarget": "snodas:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "snodas:serve:production"
+            }
+          }
+        }
+      }
+    }},
+  "defaultProject": "snodas"
+}

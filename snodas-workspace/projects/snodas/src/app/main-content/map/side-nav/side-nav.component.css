@@ -1,0 +1,76 @@
+/* TAGS */
+
+button#select-date {
+  width: 90%;
+  background-color: #9DB66B;
+}
+
+/* This date-picker div id was created to give guidance to the font size of the Angular Material's date-picker input field.
+The size of the input box is dependant on the font size, so decreasing the font size will decrease the large default box. */
+div#date-picker {
+  font-size: 14px;
+}
+
+div#day-increment {
+  font-size: 16px;
+}
+
+/* Styling for the side-nav top-level div */
+div#main {
+  text-align: center;
+  padding: 10px;
+}
+
+/* Styling for all h4 headers in the side-nav */
+h3 {
+  margin: 10px 0px 10px 0px;
+}
+
+span#current-date-display {
+  font-size: 18px;
+}
+
+/*  */
+span#snodas-animation {
+  font-weight: bold;
+}
+
+/*  */
+span#snodas-date {
+  font-weight: bold;
+}
+
+/* CLASSES */
+
+::ng-deep .mat-focused .mat-form-field-label {
+  /*change color of label*/
+  color: #9DB66B !important;
+ }
+
+::ng-deep.mat-form-field-underline {
+  /*change color of underline*/
+  background-color: #9DB66B !important;
+} 
+
+::ng-deep.mat-form-field-ripple {
+ /*change color of underline when focused*/
+ background-color: #9DB66B !important;;
+}
+
+/* ID's */
+
+#date-picker-form {
+  width: 90%;
+  padding: 0px;
+}
+
+#day-increment-form {
+  width: 90%;
+  padding: 0px;
+}
+
+/* Styling for the Select Date Form */
+#select-date-form {
+  width: 90%;
+  padding: 0px;
+}
