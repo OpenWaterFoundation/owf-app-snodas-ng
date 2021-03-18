@@ -42,33 +42,24 @@ export class AppService {
 
 
   /* function that returns the list of basins in the map */ 
-  // public getBasins(){
-  //   $.ajaxSetup({
-  //     async: false
-  //   });
-  //   var SNODAS_Geometry = (function() {
-  //     var result;
-  //     $.getJSON("assets/json/SNODAS_CO_BasinBoundaries.geojson",function(data) {
-  //         result = data;
-  //     }); return result;
-  //   })();
-  //   SNODAS_Geometry.features.sort(function(a,b){
-  //     if (a["properties"]["LOCAL_NAME"].toLowerCase() < b["properties"]["LOCAL_NAME"].toLowerCase()) return -1;
-  //     if (a["properties"]["LOCAL_NAME"].toLowerCase() > b["properties"]["LOCAL_NAME"].toLowerCase()) return 1;
-  //     if (a["properties"]["LOCAL_NAME"].toLowerCase() == b["properties"]["LOCAL_NAME"].toLowerCase())
-  //     {
-  //       if (a["properties"]["LOCAL_ID"].toLowerCase() < b["properties"]["LOCAL_ID"].toLowerCase()) return -1;
-  //       if (a["properties"]["LOCAL_ID"].toLowerCase() > b["properties"]["LOCAL_ID"].toLowerCase()) return 1;
-  //       return
-  //     }
-  //     return 0;
-  //   });
-  //   var list = new Array();
-  //   for(var index in SNODAS_Geometry.features) {
-  //     list[index] = (SNODAS_Geometry.features[index]["properties"]["LOCAL_NAME"] + " (" + SNODAS_Geometry.features[index]["properties"]["LOCAL_ID"] + ")");
-  //   }
-  //   return list;
-  // }
+  public formatBasins(SNODAS_Geometry: any): any[] {
+    SNODAS_Geometry.features.sort(function(a,b){
+      if (a["properties"]["LOCAL_NAME"].toLowerCase() < b["properties"]["LOCAL_NAME"].toLowerCase()) return -1;
+      if (a["properties"]["LOCAL_NAME"].toLowerCase() > b["properties"]["LOCAL_NAME"].toLowerCase()) return 1;
+      if (a["properties"]["LOCAL_NAME"].toLowerCase() == b["properties"]["LOCAL_NAME"].toLowerCase())
+      {
+        if (a["properties"]["LOCAL_ID"].toLowerCase() < b["properties"]["LOCAL_ID"].toLowerCase()) return -1;
+        if (a["properties"]["LOCAL_ID"].toLowerCase() > b["properties"]["LOCAL_ID"].toLowerCase()) return 1;
+        return
+      }
+      return 0;
+    });
+    var list = [];
+    for(var index in SNODAS_Geometry.features) {
+      list[index] = (SNODAS_Geometry.features[index]["properties"]["LOCAL_NAME"] + " (" + SNODAS_Geometry.features[index]["properties"]["LOCAL_ID"] + ")");
+    }
+    return list;
+  }
 
   /**
    * 
@@ -79,7 +70,7 @@ export class AppService {
 
   /**
    * 
-   * @returns 
+   * @returns The current date the map is displaying
    */
   public getCurrDate(): string {
     return this.currDate;

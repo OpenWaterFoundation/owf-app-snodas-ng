@@ -1,5 +1,18 @@
 /* TAGS */
 
+/* Styling for all Graph buttons */
+button.graph-button {
+  background-color: #9DB66B;
+  margin: 10px 0px 10px 0px;
+  white-space: pre-wrap;
+  width: 90%;
+}
+
+/* For any Graph buttons that contain text with more than one line, shrink the line-height. */
+button#multi-line {
+  line-height: 1.5;
+}
+
 button#select-date {
   width: 90%;
   background-color: #9DB66B;
@@ -23,7 +36,19 @@ div#main {
 
 /* Styling for all h4 headers in the side-nav */
 h3 {
-  margin: 10px 0px 10px 0px;
+  margin: 0px 0px 10px 0px;
+}
+
+/*  */
+input#search {
+  height: 48px;
+  width: 242px;
+  padding: 0px 10px 0px 10px;
+}
+
+/* Styling for the ID: and Name: properties under Selected Basin */
+p#current-basin-display {
+  margin: 4px 0px 4px 0px;
 }
 
 span#current-date-display {
@@ -57,7 +82,17 @@ span#snodas-date {
  background-color: #9DB66B !important;;
 }
 
+::ng-deep .mat-select-arrow {
+  color: #9DB66B !important;
+}
+
 /* ID's */
+
+#basin-option {
+  white-space: pre-wrap;
+  line-height: 1;
+  text-align: center
+}
 
 #date-picker-form {
   width: 90%;
@@ -70,7 +105,8 @@ span#snodas-date {
 }
 
 /* Styling for the Select Date Form */
-#select-date-form {
-  width: 90%;
+#select-form {
   padding: 0px;
+  font-size: 14px;
+  width: 90%;
 }

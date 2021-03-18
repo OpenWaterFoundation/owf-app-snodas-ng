@@ -1,10 +1,14 @@
 <div id="main">
 
-  <mat-form-field id="select-date-form" appearance="fill">
+  <mat-form-field id="select-form" appearance="fill">
     <mat-label>Select Date</mat-label>
-    <mat-select [(ngModel)]="selectedDate" name="date-selection">
-      <input matInput (keyup)="userInput($event.target.value)">
-      <mat-option *ngFor="let date of selectedDates">
+    <mat-select name="date-selection">
+      <input matInput
+              id="search"
+              placeholder="Search dates..."
+              (keyup)="userInput($event, 'date')">
+      <mat-option *ngFor="let date of selectedDates"
+                    (click)="callUpdateFile(date)">
         {{date}}
       </mat-option>
     </mat-select>
@@ -45,14 +49,77 @@
 
   <hr>
 
-  <mat-form-field id="select-date-form" appearance="fill">
+  <mat-form-field id="select-form" appearance="fill">
     <mat-label>Select Basin</mat-label>
-    <mat-select [(ngModel)]="selectedDate" name="basin-selection">
-      <input matInput (keyup)="userInput($event.target.value)">
-      <mat-option *ngFor="let basin of allBasins">
+    <mat-select name="basin-selection">
+      <input matInput
+              id="search"
+              placeholder="Search basins..."
+              (keyup)="userInput($event, 'basin')">
+      <mat-option *ngFor="let basin of selectedBasins"
+                  id="basin-option"
+                  (click)="callUpdateBasin(basin)">
         {{basin}}
       </mat-option>
     </mat-select>
   </mat-form-field>
+
+  <h3><u>Selected Basin</u></h3>
+  <div *ngIf="isBasinSelected === false">
+    <p id="current-basin-display"><b>Name: </b>N/A</p>
+    <p id="current-basin-display"><b>ID: </b>N/A</p>
+  </div>
+  
+  <div *ngIf="isBasinSelected === true">
+    <p id="current-basin-display"><b>Name: </b>{{selectedBasinName}}</p>
+    <p id="current-basin-display"><b>ID: </b>{{selectedBasinID}}</p>
+  </div>
+
+  <!-- The bottom 8 Basin Graph buttons. -->
+  <button mat-raised-button
+          class="graph-button"
+          [disabled]="isBasinSelected | menuDisable">
+    SNODAS Snow Cover Graph
+  </button>
+
+  <button mat-raised-button
+          class="graph-button"
+          [disabled]="isBasinSelected | menuDisable">
+    SNODAS SWE Graph
+  </button>
+
+  <button mat-raised-button
+          class="graph-button"
+          [disabled]="isBasinSelected | menuDisable">
+    SNODAS SWE Volume Graph
+  </button>
+
+  <button mat-raised-button
+          id="multi-line"
+          class="graph-button"
+          [disabled]="isBasinSelected | menuDisable">
+    SNODAS SWE Upstream Total Volume Graph
+  </button>
+
+  <button mat-raised-button
+          id="multi-line"
+          class="graph-button"
+          [disabled]="isBasinSelected | menuDisable">
+    SNODAS SWE 1 Week Change Graph
+  </button>
+
+  <button mat-raised-button
+          id="multi-line"
+          class="graph-button"
+          [disabled]="isBasinSelected | menuDisable">
+    SNODAS SWE Volume Gain, Cumulative Graph
+  </button>
+
+  <button mat-raised-button
+          id="multi-line"
+          class="graph-button"
+          [disabled]="isBasinSelected | menuDisable">
+    SNODAS SWE Upstream Total Volume Gain, Cumulative Graph
+  </button>
   
 </div>

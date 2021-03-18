@@ -1,5 +1,8 @@
 import { Component,
-          OnInit }      from '@angular/core';
+          ChangeDetectorRef,
+          OnDestroy,
+          OnInit, }     from '@angular/core';
+import { MediaMatcher } from "@angular/cdk/layout";
 import { Subscription } from 'rxjs';
 
 import { AppService }   from '../../app.service';
@@ -16,7 +19,7 @@ declare var L: any;
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css']
 })
-export class MapComponent implements OnInit {
+export class MapComponent implements OnInit, OnDestroy {
   /**
    * The background layer of the map.
    */
@@ -38,6 +41,10 @@ export class MapComponent implements OnInit {
    */
   public mapConfig: any;
   /**
+   * Unknown.
+   */
+  public mobileQuery: MediaQueryList;
+  /**
    * GeoJSON layers on the map.
    */
   public geojson: any;
@@ -50,6 +57,10 @@ export class MapComponent implements OnInit {
    */
   public mapDate: any;
   /**
+   * Unknown.
+   */
+  private mobileQueryListener: () => void;
+  /**
    * 
    */
   public SNODAS_Geometry: any;
@@ -60,7 +71,14 @@ export class MapComponent implements OnInit {
 
 
 
-  constructor(private appService: AppService) { }
+  constructor(private appService: AppService,
+              private changeDetectorRef: ChangeDetectorRef,
+              private media: MediaMatcher) {
+
+    this.mobileQuery = media.matchMedia("(max-width: 600px)");
+    this.mobileQueryListener = () => changeDetectorRef.detectChanges();
+    this.mobileQuery.addEventListener("change", this.mobileQueryListener);
+  }
 
 
   /**
@@ -319,40 +337,40 @@ export class MapComponent implements OnInit {
         this function will recieve the LOCAL_ID of that basin and then update
         the SNODAS Plots image section with the proper plot graph. This will
         then get updated everytime a new basin is selected */
-        function SetSNODASPlot(name) {
-          (<HTMLInputElement>document.getElementById("button_one")).disabled = false;
-          (<HTMLInputElement>document.getElementById("button_two")).disabled = false;
-          (<HTMLInputElement>document.getElementById("button_three")).disabled = false;
-          (<HTMLInputElement>document.getElementById("button_four")).disabled = false;
-          (<HTMLInputElement>document.getElementById("button_five")).disabled = false;
-          (<HTMLInputElement>document.getElementById("button_six")).disabled = false;
-          (<HTMLInputElement>document.getElementById("button_seven")).disabled = false;
+        function SetSNODASPlot(name: any) {
+          // (<HTMLInputElement>document.getElementById("button_one")).disabled = false;
+          // (<HTMLInputElement>document.getElementById("button_two")).disabled = false;
+          // (<HTMLInputElement>document.getElementById("button_three")).disabled = false;
+          // (<HTMLInputElement>document.getElementById("button_four")).disabled = false;
+          // (<HTMLInputElement>document.getElementById("button_five")).disabled = false;
+          // (<HTMLInputElement>document.getElementById("button_six")).disabled = false;
+          // (<HTMLInputElement>document.getElementById("button_seven")).disabled = false;
 
-          _this.appService.setChartBasinID(name);
+          // _this.appService.setChartBasinID(name);
 
-          (<HTMLImageElement>document.getElementById("Basin_SnowCover_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SnowCover.png";
-          document.getElementById("close-button-snowcover").innerHTML = "Click anywhere to close graph view";
+          // (<HTMLImageElement>document.getElementById("Basin_SnowCover_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SnowCover.png";
+          // document.getElementById("close-button-snowcover").innerHTML = "Click anywhere to close graph view";
 
-          (<HTMLImageElement>document.getElementById("Basin_SWE_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SWE.png";
-          document.getElementById("close-button-swe").innerHTML = "Click anywhere to close graph view";
+          // (<HTMLImageElement>document.getElementById("Basin_SWE_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SWE.png";
+          // document.getElementById("close-button-swe").innerHTML = "Click anywhere to close graph view";
 
-          // (<HTMLImageElement>document.getElementById("Basin_SWE_Volume_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SWE-Volume.png";
-          // document.getElementById("close-button-swe-volume").innerHTML = "Click anywhere to close graph view";
+          // // (<HTMLImageElement>document.getElementById("Basin_SWE_Volume_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SWE-Volume.png";
+          // // document.getElementById("close-button-swe-volume").innerHTML = "Click anywhere to close graph view";
 
-          // (<HTMLImageElement>document.getElementById("Basin_SWE_Upstream_Total_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-UpstreamTotal-SNODAS-SWE-Volume.png";
-          // document.getElementById("close-button-swe-upstream-total").innerHTML = "Click anywhere to close graph view";
+          // // (<HTMLImageElement>document.getElementById("Basin_SWE_Upstream_Total_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-UpstreamTotal-SNODAS-SWE-Volume.png";
+          // // document.getElementById("close-button-swe-upstream-total").innerHTML = "Click anywhere to close graph view";
 
-          (<HTMLImageElement>document.getElementById("Basin_SWE_Upstream_Cumulative_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-UpstreamTotal-SNODAS-SWE-Volume-Gain-Cumulative.png";
-          document.getElementById("close-button-swe-upstream-cumulative").innerHTML = "Click anywhere to close graph view";
+          // (<HTMLImageElement>document.getElementById("Basin_SWE_Upstream_Cumulative_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-UpstreamTotal-SNODAS-SWE-Volume-Gain-Cumulative.png";
+          // document.getElementById("close-button-swe-upstream-cumulative").innerHTML = "Click anywhere to close graph view";
 
-          (<HTMLImageElement>document.getElementById("Basin_Swe_Volume_1WeekChange_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SWE-Volume-1WeekChange.png";
-          document.getElementById("close-button-swe-volume-change").innerHTML = "Click anywhere to close graph view";
+          // (<HTMLImageElement>document.getElementById("Basin_Swe_Volume_1WeekChange_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SWE-Volume-1WeekChange.png";
+          // document.getElementById("close-button-swe-volume-change").innerHTML = "Click anywhere to close graph view";
 
-          (<HTMLImageElement>document.getElementById("Basin_Swe_Volume_Gain_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SWE-Volume-Gain-Cumulative.png";
-          document.getElementById("close-button-swe-volume-gain").innerHTML = "Click anywhere to close graph view";
+          // (<HTMLImageElement>document.getElementById("Basin_Swe_Volume_Gain_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SWE-Volume-Gain-Cumulative.png";
+          // document.getElementById("close-button-swe-volume-gain").innerHTML = "Click anywhere to close graph view";
 
-          document.getElementById("BasinID").innerHTML = "Selected Basin ID: " + name;
-          document.getElementById("BasinName").innerHTML = "Basin Name: " + getBasinName(name);
+          // document.getElementById("BasinID").innerHTML = "Selected Basin ID: " + name;
+          // document.getElementById("BasinName").innerHTML = "Basin Name: " + getBasinName(name);
         }
 
         /* getBasinName takes in a basin id and will search through the
@@ -467,7 +485,8 @@ export class MapComponent implements OnInit {
 
     this.forkJoinSubscription$ = this.appService.setMapData().subscribe((results: any) => {
       // Results are as follows:
-      // results[0] - setDates
+      // results[0] - setDates: 
+      // results[1] - SNODAS_boundaries: The geoJSON file for the SNODAS boundaries (basins) in Colorado.
 
       this.appService.setDates(results[0]);
       this.SNODAS_Geometry = results[1];
@@ -478,7 +497,13 @@ export class MapComponent implements OnInit {
       this.buildMap(this.appService.getDates()[0], 'none', false);
     });
     
-    
+  }
+
+  /**
+   * Called once, before the instance is destroyed.
+   */
+  ngOnDestroy(): void {
+    this.mobileQuery.removeEventListener("change", this.mobileQueryListener);
   }
 
   /* This function is used for the CO_boundary style. It sets the weight of the line used
@@ -501,14 +526,14 @@ export class MapComponent implements OnInit {
   // }
 
   /* Changes which basin is currently highlighted on the map */
-  // public updateBasin(basin) {
-  //   this.buildMap(this.globals.date, basin, true);
-  // }
+  public updateBasin(basin: any) {
+    this.buildMap(this.appService.getCurrDate(), basin, true);
+  }
 
   /* Called to update the date of the data the map is displaying */
-  // public updateFile(file) {
-  //   file = file.substr(0,4) + file.substr(5,2) + file.substr(8,2);
-  //   this.buildMap(file, 'none', true);
-  // }
+  public updateFile(file: any) {
+    file = file.substr(0,4) + file.substr(5,2) + file.substr(8,2);
+    this.buildMap(file, 'none', true);
+  }
 
 }
