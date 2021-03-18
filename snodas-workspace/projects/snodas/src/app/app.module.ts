@@ -28,6 +28,7 @@ import { HeaderComponent }         from './header/header.component';
 import { NotFoundComponent }       from './main-content/not-found/not-found.component';
 import { MapComponent }            from './main-content/map/map.component';
 import { SideNavComponent }        from './main-content/map/side-nav/side-nav.component';
+import { MenuDisablePipe } from './main-content/map/side-nav/menu-disable.pipe';
 
 
 /**
@@ -51,6 +52,7 @@ const appInit = (appService: AppService) => {
     NotFoundComponent,
     MapComponent,
     SideNavComponent,
+    MenuDisablePipe,
   ],
   imports: [
     AppRoutingModule,

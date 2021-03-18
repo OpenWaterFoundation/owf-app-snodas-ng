@@ -4,8 +4,12 @@
               mode="side"
               position="end"
               opened>
-    <div *ngIf="currentDateDisplay">
-      <app-side-nav [currentDateDisplay]="currentDateDisplay"></app-side-nav>
+    <div *ngIf="SNODAS_Geometry">
+      <app-side-nav [currentDateDisplay]="currentDateDisplay"
+                    [SNODAS_Geometry]="SNODAS_Geometry"
+                    (updateBasinFunction)="updateBasin($event)"
+                    (updateFileFunction)="updateFile($event)">
+      </app-side-nav>
     </div>
 
   </mat-drawer>
