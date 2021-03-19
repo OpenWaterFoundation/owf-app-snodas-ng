@@ -3,7 +3,7 @@ import { Component,
           OnDestroy,
           OnInit, }     from '@angular/core';
 import { MediaMatcher } from "@angular/cdk/layout";
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 
 import { AppService }   from '../../app.service';
 
@@ -25,9 +25,13 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   public background: any;
   /**
-   * 
+   * The human readable version of the current date being displayed on the map.
    */
   public currentDateDisplay: string;
+  /**
+   * Subject used to send information to the side-nav Component as an event when a basin is clicked.
+   */
+  public eventsSubject: Subject<string> = new Subject<string>();
   /**
    * Class variable for the Leaflet map's config file subscription object so it can be closed on this component's destruction.
    */
@@ -315,7 +319,10 @@ export class MapComponent implements OnInit, OnDestroy {
           clickOnMapItem(basin.slice(basin.indexOf('(')+1, basin.indexOf(')')));
         }
 
-        function clickOnMapItem(Local_ID) {
+        function clickOnMapItem(Local_ID: string) {
+          // Once a basin has been clicked, use the eventsSubject Subject (which is also an observable and observer) and use the
+          // next method to send the selected basin's ID to the child side-nav component as an event.
+          _this.eventsSubject.next(Local_ID);
           if(basinSelected === true){
             var oldLayer = _this.geojson.getLayer(oldBasin);
             oldLayer.feature.properties.hasBeenSelected = false;

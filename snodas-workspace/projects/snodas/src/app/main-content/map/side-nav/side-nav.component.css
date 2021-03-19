@@ -30,6 +30,7 @@ div#day-increment {
 
 /* Styling for the side-nav top-level div */
 div#main {
+  /* color: white; Changes most of the text color in the side nav to white. Excludes buttons, mat-select, etc. */ 
   text-align: center;
   padding: 10px;
 }

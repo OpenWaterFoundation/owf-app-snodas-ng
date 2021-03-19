@@ -78,32 +78,37 @@
   <!-- The bottom 8 Basin Graph buttons. -->
   <button mat-raised-button
           class="graph-button"
+          (click)="openImageDialog('-SNODAS-SnowCover.png')"
           [disabled]="isBasinSelected | menuDisable">
     SNODAS Snow Cover Graph
   </button>
 
   <button mat-raised-button
           class="graph-button"
+          (click)="openImageDialog('-SNODAS-SWE.png')"
           [disabled]="isBasinSelected | menuDisable">
     SNODAS SWE Graph
   </button>
 
+  <!-- [disabled]="isBasinSelected | menuDisable" -->
   <button mat-raised-button
           class="graph-button"
-          [disabled]="isBasinSelected | menuDisable">
+          disabled>
     SNODAS SWE Volume Graph
   </button>
 
+  <!-- [disabled]="isBasinSelected | menuDisable" -->
   <button mat-raised-button
           id="multi-line"
           class="graph-button"
-          [disabled]="isBasinSelected | menuDisable">
+          disabled>
     SNODAS SWE Upstream Total Volume Graph
   </button>
 
   <button mat-raised-button
           id="multi-line"
           class="graph-button"
+          (click)="openImageDialog('-SNODAS-SWE-Volume-1WeekChange.png')"
           [disabled]="isBasinSelected | menuDisable">
     SNODAS SWE 1 Week Change Graph
   </button>
@@ -111,6 +116,7 @@
   <button mat-raised-button
           id="multi-line"
           class="graph-button"
+          (click)="openImageDialog('-UpstreamTotal-SNODAS-SWE-Volume-Gain-Cumulative.png')"
           [disabled]="isBasinSelected | menuDisable">
     SNODAS SWE Volume Gain, Cumulative Graph
   </button>
@@ -118,6 +124,7 @@
   <button mat-raised-button
           id="multi-line"
           class="graph-button"
+          (click)="openImageDialog('-SNODAS-SWE-Volume-Gain-Cumulative.png')"
           [disabled]="isBasinSelected | menuDisable">
     SNODAS SWE Upstream Total Volume Gain, Cumulative Graph
   </button>

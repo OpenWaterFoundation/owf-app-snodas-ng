@@ -2,8 +2,18 @@ import { Component,
           EventEmitter,
           Input,
           OnInit, 
-          Output}    from '@angular/core';
-import { AppService } from '../../../app.service';
+          Output}               from '@angular/core';
+
+import { MatDialog,
+          MatDialogConfig,
+          MatDialogRef }        from '@angular/material/dialog';
+
+import { DialogImageComponent } from '@openwaterfoundation/common/ui/dialog';
+import { WindowManager,
+          WindowType }          from '@openwaterfoundation/common/ui/window-manager';
+import { Observable,
+          Subscription }        from 'rxjs';
+import { AppService }           from '../../../app.service';
 
 @Component({
   selector: 'app-side-nav',
@@ -27,6 +37,10 @@ export class SideNavComponent implements OnInit {
    * The current date retrieved from the parent MapComponent to be displayed in a human-readable format.
    */
   @Input() currentDateDisplay: string;
+
+  @Input() events: Observable<void>;
+
+  private eventsSubscription$: Subscription;
   /**
    * The minimum date a user can choose in the date picker.
    */
@@ -67,9 +81,15 @@ export class SideNavComponent implements OnInit {
    * 
    */
   @Output() updateFileFunction = new EventEmitter<any>();
+  /**
+   * The windowManager instance, whose job it will be to create, maintain, and remove multiple open dialogs from the InfoMapper.
+   */
+  public windowManager: WindowManager = WindowManager.getInstance();
 
 
-  constructor(private appService: AppService) {
+  constructor(private appService: AppService,
+              public dialog: MatDialog) {
+
     this.allDates = this.appService.getDatesDashes();
     this.selectedDates = this.allDates;
   }
@@ -96,6 +116,39 @@ export class SideNavComponent implements OnInit {
   }
 
   /**
+   * 
+   * @param graphType 
+   */
+  public openImageDialog(graphType: string): void {
+    var windowID = 'dialog-image' + graphType;
+    if (this.windowManager.windowExists(windowID)) {
+      return;
+    }
+
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.data = {
+      dialogID: windowID,
+      imagePath: 'assets/SnowpackGraphsByBasin/' + this.selectedBasinID + graphType,
+      imageDescription: ''
+    }
+    const dialogRef: MatDialogRef<DialogImageComponent, any> = this.dialog.open(DialogImageComponent, {
+      data: dialogConfig,
+      // This stops the dialog from containing a backdrop, which means the background opacity is set to 0, and the
+      // entire InfoMapper is still navigable while having the dialog open. This way, you can have multiple dialogs
+      // open at the same time.
+      hasBackdrop: false,
+      panelClass: ['custom-dialog-container', 'mat-elevation-z20'],
+      height: "760px",
+      width: "900px",
+      minHeight: "760px",
+      minWidth: "900px",
+      maxHeight: "760px",
+      maxWidth: "900px"
+    });
+    this.windowManager.addWindow(windowID, WindowType.DOC);
+  }
+
+  /**
    * Takes in a basin id and searches through SNODAS_Geometry object to find the local name of the basin.
    * @param id The basin ID
    * @returns The basin name as a string.
@@ -112,8 +165,16 @@ export class SideNavComponent implements OnInit {
    * 
    */
   ngOnInit(): void {
+    // Format all dates so they are similar to ISO 8601 formatting with dashes.
     this.allBasins = this.appService.formatBasins(this.SNODAS_Geometry);
+    // Create a deep copy of the original all basins array 
     this.selectedBasins = this.allBasins.slice();
+
+    this.eventsSubscription$ = this.events.subscribe((basinID: any) => {
+      this.isBasinSelected = true;
+      this.selectedBasinID = basinID;
+      this.selectedBasinName = this.getBasinName(basinID);
+    })
   }
 
   /**

@@ -10,7 +10,7 @@
   <!-- Main map -->
   <button mat-button
           id="navbar-button"
-          matTooltip="Click to view dashboard map"
+          matTooltip="View dashboard map"
           [matTooltipShowDelay]="750"
           matTooltipPosition="left"
           [routerLink]="['/dashboard']"
@@ -20,7 +20,7 @@
   <!-- About Section -->
   <button mat-button
           id="navbar-button"
-          matTooltip="Click to view SNODAS information"
+          matTooltip="View SNODAS information"
           [matTooltipShowDelay]="750"
           matTooltipPosition="left"
           [routerLink]="['about']"
@@ -30,13 +30,18 @@
   <!-- Data Section -->
   <button mat-button
           id="navbar-button"
-          [disabled]="true">
+          [disabled]="true"
+          matTooltip="View & download SNODAS data"
+          [matTooltipShowDelay]="750"
+          matTooltipPosition="left"
+          [routerLink]="['data']"
+          routerLinkActive="link-active">
     <span>Data</span>
   </button>
   <!-- Documentation Section -->
   <button mat-button
           id="navbar-button"
-          matTooltip="Click to view SNODAS documentation"
+          matTooltip="View SNODAS documentation"
           [matTooltipShowDelay]="750"
           matTooltipPosition="left"
           [routerLink]="['docs']"

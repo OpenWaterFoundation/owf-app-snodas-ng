@@ -6,11 +6,13 @@ import { RouterModule,
 import { AboutComponent } from './main-content/about/about.component';
 import { DocComponent }   from './main-content/doc/doc.component';
 import { MapComponent }   from './main-content/map/map.component';
+import { DataComponent }  from './main-content/data/data.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: MapComponent },
   { path: 'about', component: AboutComponent },
+  { path: 'data', component: DataComponent },
   { path: 'docs', component: DocComponent },
 ]
 

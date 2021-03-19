@@ -7,6 +7,7 @@
     <div *ngIf="SNODAS_Geometry">
       <app-side-nav [currentDateDisplay]="currentDateDisplay"
                     [SNODAS_Geometry]="SNODAS_Geometry"
+                    [events]="eventsSubject.asObservable()"
                     (updateBasinFunction)="updateBasin($event)"
                     (updateFileFunction)="updateFile($event)">
       </app-side-nav>
