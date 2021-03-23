@@ -121,6 +121,13 @@ span#snodas-date {
   color: #9DB66B !important;
 }
 
+/* Styles the font size of the SNODAS animation date picker placeholder input field. This is so the placeholder `YYYY-MM-DD`
+can be shown in its entirety without being cut off. ::placeholder is a pseudo element (or class), with more info about them at
+https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-elements*/
+input.range-input::placeholder {
+  font-size: 12px;
+}
+
 /* ID's */
 
 #animation-expansion-panel {

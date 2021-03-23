@@ -12,15 +12,18 @@ import { MatDatepickerModule }     from '@angular/material/datepicker';
 import { MatExpansionModule }      from '@angular/material/expansion';
 import { MatFormFieldModule }      from '@angular/material/form-field';
 import { MatInputModule }          from '@angular/material/input';
-import { MatNativeDateModule }     from '@angular/material/core';
+import { DateAdapter,
+          MatNativeDateModule, 
+          MAT_DATE_FORMATS}        from '@angular/material/core';
 import { MatSelectModule }         from '@angular/material/select';
 import { MatSidenavModule }        from '@angular/material/sidenav';
 import { MatSliderModule }         from '@angular/material/slider';
 import { MatToolbarModule }        from '@angular/material/toolbar';
 import { MatTooltipModule }        from '@angular/material/tooltip';
 
-import { AppRoutingModule }        from './app-routing.module';
+import { ShowdownModule }          from 'ngx-showdown';
 
+import { AppRoutingModule }        from './app-routing.module';
 import { AppService }              from './app.service';
 
 import { AboutComponent }          from './main-content/about/about.component';
@@ -32,6 +35,8 @@ import { MapComponent }            from './main-content/map/map.component';
 import { SideNavComponent }        from './main-content/map/side-nav/side-nav.component';
 import { MenuDisablePipe }         from './main-content/map/side-nav/menu-disable.pipe';
 import { DataComponent }           from './main-content/data/data.component';
+import { AppDateAdapter,
+          APP_DATE_FORMATS }       from './main-content/map/side-nav/format-datepicker';
 
 
 /**
@@ -42,7 +47,7 @@ import { DataComponent }           from './main-content/data/data.component';
  */
 const appInit = (appService: AppService) => {
   return (): Promise<any> => {
-    return appService.loadMapConfig();
+    return appService.loadConfigFiles();
   };
 };
 
@@ -74,18 +79,23 @@ const appInit = (appService: AppService) => {
     MatSidenavModule,
     MatSliderModule,
     MatToolbarModule,
-    MatTooltipModule
+    MatTooltipModule,
+    ShowdownModule.forRoot({
+      emoji: true, noHeaderId: true, flavor: 'github', tables: true, strikethrough: true, simpleLineBreaks: false
+    })
   ],
   providers: [
     AppService,
-    {provide : LocationStrategy , useClass: HashLocationStrategy},
+    MatDatepickerModule,
+    { provide : LocationStrategy , useClass: HashLocationStrategy },
     {
       provide: APP_INITIALIZER,
       useFactory: appInit,
       multi: true,
       deps: [AppService]
     },
-    MatDatepickerModule
+    { provide: DateAdapter, useClass: AppDateAdapter },
+    { provide: MAT_DATE_FORMATS, useValue: APP_DATE_FORMATS }
   ],
   bootstrap: [AppComponent]
 })

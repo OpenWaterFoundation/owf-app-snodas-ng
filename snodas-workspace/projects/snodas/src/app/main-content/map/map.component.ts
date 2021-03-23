@@ -216,7 +216,7 @@ export class MapComponent implements OnInit, OnDestroy {
         };
 
         this.mapDate.update = function() {
-          this._div.innerHTML = '<h4>' + 'Current Date: ' + currDate.substr(0,4) + '-' + currDate.substr(4,2) + '-' +
+          this._div.innerHTML = '<h4>' + 'Map Data Date: ' + currDate.substr(0,4) + '-' + currDate.substr(4,2) + '-' +
           currDate.substr(6,2) + "</h4>";
         };
 
@@ -445,23 +445,28 @@ export class MapComponent implements OnInit, OnDestroy {
    * Called after the constructor, initializing input properties, and the first call to ngOnChanges.
    */
   ngOnInit(): void {
-    // Set the pre-initialized mapConfig JSON object to mapConfig.
-    this.mapConfig = this.appService.getMapConfig();
-    console.log(this.mapConfig);
+    if (this.appService.isInitMap() === true) {
+      // Uncomment this line out to test dealing with remembering map state.
+      // this.appService.mapCreated();
+      // Set the pre-initialized mapConfig JSON object to mapConfig.
+      this.mapConfig = this.appService.getMapConfig();
 
-    this.forkJoinSubscription$ = this.appService.setMapData().subscribe((results: any) => {
-      // Results are as follows:
-      // results[0] - setDates: 
-      // results[1] - SNODAS_boundaries: The geoJSON file for the SNODAS boundaries (basins) in Colorado.
+      this.forkJoinSubscription$ = this.appService.setMapData().subscribe((results: any) => {
+        // Results are as follows:
+        // results[0] - setDates: 
+        // results[1] - SNODAS_boundaries: The geoJSON file for the SNODAS boundaries (basins) in Colorado.
 
-      this.appService.setDates(results[0]);
-      this.SNODAS_Geometry = results[1];
+        this.appService.setDates(results[0]);
+        this.SNODAS_Geometry = results[1];
 
-      // Initialize the Leaflet map.
-      this.initMap();
-      // Build the map each update.
-      this.buildMap(this.appService.getDates()[0], 'none', false);
-    });
+        // Initialize the Leaflet map.
+        this.initMap();
+        // Build the map each update.
+        this.buildMap(this.appService.getDates()[0], 'none', false);
+      });
+    } else {
+      console.log('here');
+    }
     
   }
 
