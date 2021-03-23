@@ -9,11 +9,13 @@ import { FormsModule }             from '@angular/forms';
 
 import { MatButtonModule }         from '@angular/material/button';
 import { MatDatepickerModule }     from '@angular/material/datepicker';
+import { MatExpansionModule }      from '@angular/material/expansion';
 import { MatFormFieldModule }      from '@angular/material/form-field';
 import { MatInputModule }          from '@angular/material/input';
 import { MatNativeDateModule }     from '@angular/material/core';
 import { MatSelectModule }         from '@angular/material/select';
 import { MatSidenavModule }        from '@angular/material/sidenav';
+import { MatSliderModule }         from '@angular/material/slider';
 import { MatToolbarModule }        from '@angular/material/toolbar';
 import { MatTooltipModule }        from '@angular/material/tooltip';
 
@@ -28,8 +30,8 @@ import { HeaderComponent }         from './header/header.component';
 import { NotFoundComponent }       from './main-content/not-found/not-found.component';
 import { MapComponent }            from './main-content/map/map.component';
 import { SideNavComponent }        from './main-content/map/side-nav/side-nav.component';
-import { MenuDisablePipe } from './main-content/map/side-nav/menu-disable.pipe';
-import { DataComponent } from './main-content/data/data.component';
+import { MenuDisablePipe }         from './main-content/map/side-nav/menu-disable.pipe';
+import { DataComponent }           from './main-content/data/data.component';
 
 
 /**
@@ -64,11 +66,13 @@ const appInit = (appService: AppService) => {
     HttpClientModule,
     MatButtonModule,
     MatDatepickerModule,
+    MatExpansionModule,
     MatFormFieldModule,
     MatInputModule,
     MatNativeDateModule,
     MatSelectModule,
     MatSidenavModule,
+    MatSliderModule,
     MatToolbarModule,
     MatTooltipModule
   ],

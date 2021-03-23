@@ -18,15 +18,7 @@ button#navbar-button {
 
 /* CLASSES */
 
-.content {
-  display: flex;
-  margin: 82px auto 32px;
-  padding: 0 16px;
-  max-width: 960px;
-  flex-direction: column;
-  align-items: center;
-}
-
+/* The main nav tag class for the Header Component. Contains styling for the nav bar. */
 .toolbar {
   border-top: #9db66b 5px solid;
   border-bottom: #e9eaee 5px solid;

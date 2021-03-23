@@ -120,15 +120,27 @@ export class SideNavComponent implements OnInit {
    * @param graphType 
    */
   public openImageDialog(graphType: string): void {
-    var windowID = 'dialog-image' + graphType;
+    var windowID = 'dialog-image' + this.selectedBasinID + graphType;
     if (this.windowManager.windowExists(windowID)) {
       return;
+    }
+
+    var fullImagePath: string;
+    console.log(this.selectedBasinID);
+    console.log(isNaN(parseInt(this.selectedBasinID)));
+    if (graphType === '-SNODAS-SWE-Volume.png' ||
+        graphType === 'UpstreamTotal-SNODAS-SWE-Volume.png' ||
+        isNaN(parseInt(this.selectedBasinID))) {
+
+      fullImagePath = 'http://snodas.cdss.state.co.us/app/SnowpackGraphsByBasin/' + this.selectedBasinID + graphType;
+    } else {
+      fullImagePath = 'assets/SnowpackGraphsByBasin/' + this.selectedBasinID + graphType;
     }
 
     const dialogConfig = new MatDialogConfig();
     dialogConfig.data = {
       dialogID: windowID,
-      imagePath: 'assets/SnowpackGraphsByBasin/' + this.selectedBasinID + graphType,
+      imagePath: fullImagePath,
       imageDescription: ''
     }
     const dialogRef: MatDialogRef<DialogImageComponent, any> = this.dialog.open(DialogImageComponent, {

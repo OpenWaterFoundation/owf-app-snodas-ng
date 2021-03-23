@@ -25,6 +25,10 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   public background: any;
   /**
+   * The Leaflet layer containing the Colorado boundary.
+   */
+  public COBoundary: any;
+  /**
    * The human readable version of the current date being displayed on the map.
    */
   public currentDateDisplay: string;
@@ -61,11 +65,7 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   public mapDate: any;
   /**
-   * Unknown.
-   */
-  private mobileQueryListener: () => void;
-  /**
-   * 
+   * The object containing the SNODAS basins data from the SNODAS_boundaries property in the map config file.
    */
   public SNODAS_Geometry: any;
   /**
@@ -74,14 +74,12 @@ export class MapComponent implements OnInit, OnDestroy {
   public zoomHome: any;
 
 
+  /**
+   * 
+   * @param appService 
+   */
+  constructor(private appService: AppService) {
 
-  constructor(private appService: AppService,
-              private changeDetectorRef: ChangeDetectorRef,
-              private media: MediaMatcher) {
-
-    this.mobileQuery = media.matchMedia("(max-width: 600px)");
-    this.mobileQueryListener = () => changeDetectorRef.detectChanges();
-    this.mobileQuery.addEventListener("change", this.mobileQueryListener);
   }
 
 
@@ -94,10 +92,10 @@ export class MapComponent implements OnInit, OnDestroy {
   private buildMap(currDate: any, basin: any, defined: boolean): void {
 
     var _this = this;
-    // 
+    // Set the current date in the app service. This could be the same date if for example, a basin is selected.
     this.appService.setCurrDate(currDate);
-    // Add the render to the map every time it is built
-    L.svg().addTo(this.mainMap);
+    // Add the render to the map every time it is built. This might not be needed.
+    // L.svg().addTo(this.mainMap);
 
     // Remove all controls. May not be needed?
     if (defined === true) {
@@ -105,20 +103,23 @@ export class MapComponent implements OnInit, OnDestroy {
       this.mapDate.remove();
       this.zoomHome.remove();
     }
-
     // Loops through all the layers and removes them if they are defined and not the background layer
-    this.mainMap.eachLayer(function (layer: any) { 
-      if(layer != _this.background && layer != null && typeof(layer) != "undefined" && _this.mainMap != "undefined"){
-          _this.mainMap.removeLayer(layer);
-      }
-    });
+    // this.mainMap.eachLayer(function (layer: any) {
+    //   if(layer != _this.background && layer != null && typeof(layer) != "undefined" && _this.mainMap != "undefined"){
+    //       _this.mainMap.removeLayer(layer);
+    //   }
+    // });
+    if (this.geojson) {
+      this.mainMap.removeLayer(this.geojson);
+    }
 
-    // Grabs data from CO_boundary.geojson and adds it to the map. Creates the black border around Colorado.
-    this.appService.getJSONData(this.mapConfig.state_border).subscribe((border: any) => {
-      var border = L.geoJSON(border, {style: this.setStateBoundaryStyle}).addTo(this.mainMap);
-      // Bring the border to the back of the layers, as it's only there for reference
-      border.bringToBack();
-    });
+    // After the initial creation of the map, the COBoundary layer is stored in a class variable so it can be quickly added back
+    // onto the map each time the buildMap function is called.
+    if (this.COBoundary) {
+      this.mainMap.addLayer(this.COBoundary);
+      this.COBoundary.bringToBack();
+    }
+      
 
     // This grabs the SNODAS data from the SnowpackbyDate_(CURRENT DATE).csv file. It then assigns that data to the
     // SNODAS_Statistics variable.
@@ -139,9 +140,8 @@ export class MapComponent implements OnInit, OnDestroy {
         _this.geojson = L.geoJson(MergeData(_this.SNODAS_Geometry,result),
         {style: setSWELayerStyle, onEachFeature: onEachFeature}).addTo(_this.mainMap);
 
-        /* This feature is called by the onEachFeature function. It is what allows users to
-        highlight over basins and will pop up a gray line outlining the basin. */
-        var selectBasinCall = false;  /* select_basin_call is a boolean value. This is set true when the ClickOnMapItem function is called.
+        // SelectBasinCall is set to true when the ClickOnMapItem function is called.
+        var selectBasinCall = false;
 
         /**
          * Takes in a SNODAS Geometry geoJSON array and an array populated from the SnowpackStatisticsByDate/YYYYMMDD CSV file
@@ -280,8 +280,6 @@ export class MapComponent implements OnInit, OnDestroy {
           }
         }
 
-        /* Called by onEachFeature. Used if user clicks on a basin. Once a basin is selected, the proper SWE graphs
-        will be accessible to view. */
         /**
          * Called by onEachFeature. Used if user clicks on a basin. Once a basin is selected, the proper SWE graphs
          * will be accessible to view.
@@ -335,60 +333,8 @@ export class MapComponent implements OnInit, OnDestroy {
           //fire event 'click' on target layer
           layer.fireEvent('mouseover');
           layer.feature.properties.hasBeenSelected = true;
-          SetSNODASPlot(Local_ID);
           // select_basin_call = true;
           basinSelected = true;
-        }
-
-        /* SetSNODASPlot is called whenever a basin is clicked. Once clicked,
-        this function will recieve the LOCAL_ID of that basin and then update
-        the SNODAS Plots image section with the proper plot graph. This will
-        then get updated everytime a new basin is selected */
-        function SetSNODASPlot(name: any) {
-          // (<HTMLInputElement>document.getElementById("button_one")).disabled = false;
-          // (<HTMLInputElement>document.getElementById("button_two")).disabled = false;
-          // (<HTMLInputElement>document.getElementById("button_three")).disabled = false;
-          // (<HTMLInputElement>document.getElementById("button_four")).disabled = false;
-          // (<HTMLInputElement>document.getElementById("button_five")).disabled = false;
-          // (<HTMLInputElement>document.getElementById("button_six")).disabled = false;
-          // (<HTMLInputElement>document.getElementById("button_seven")).disabled = false;
-
-          // _this.appService.setChartBasinID(name);
-
-          // (<HTMLImageElement>document.getElementById("Basin_SnowCover_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SnowCover.png";
-          // document.getElementById("close-button-snowcover").innerHTML = "Click anywhere to close graph view";
-
-          // (<HTMLImageElement>document.getElementById("Basin_SWE_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SWE.png";
-          // document.getElementById("close-button-swe").innerHTML = "Click anywhere to close graph view";
-
-          // // (<HTMLImageElement>document.getElementById("Basin_SWE_Volume_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SWE-Volume.png";
-          // // document.getElementById("close-button-swe-volume").innerHTML = "Click anywhere to close graph view";
-
-          // // (<HTMLImageElement>document.getElementById("Basin_SWE_Upstream_Total_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-UpstreamTotal-SNODAS-SWE-Volume.png";
-          // // document.getElementById("close-button-swe-upstream-total").innerHTML = "Click anywhere to close graph view";
-
-          // (<HTMLImageElement>document.getElementById("Basin_SWE_Upstream_Cumulative_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-UpstreamTotal-SNODAS-SWE-Volume-Gain-Cumulative.png";
-          // document.getElementById("close-button-swe-upstream-cumulative").innerHTML = "Click anywhere to close graph view";
-
-          // (<HTMLImageElement>document.getElementById("Basin_Swe_Volume_1WeekChange_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SWE-Volume-1WeekChange.png";
-          // document.getElementById("close-button-swe-volume-change").innerHTML = "Click anywhere to close graph view";
-
-          // (<HTMLImageElement>document.getElementById("Basin_Swe_Volume_Gain_img")).src = "assets/SnowpackGraphsByBasin/" + name + "-SNODAS-SWE-Volume-Gain-Cumulative.png";
-          // document.getElementById("close-button-swe-volume-gain").innerHTML = "Click anywhere to close graph view";
-
-          // document.getElementById("BasinID").innerHTML = "Selected Basin ID: " + name;
-          // document.getElementById("BasinName").innerHTML = "Basin Name: " + getBasinName(name);
-        }
-
-        /* getBasinName takes in a basin id and will search through the
-        SNODAS_Geometry.json file to find the local name of the basin. It will
-        then return the local name of the coinciding local id. */
-        function getBasinName(id: any) {
-          for(let index in this.SNODAS_Geometry.features) {
-            if(this.SNODAS_Geometry.features[index]["properties"]["LOCAL_ID"] == id) {
-                return this.SNODAS_Geometry.features[index]["properties"]["LOCAL_NAME"];
-            }
-          }
         }
       }
 
@@ -422,14 +368,20 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * 
+   * Initializes the Leaflet map when the Map Component is created. Is only called once, with subsequent updates using the
+   * buildMap function.
    */
   private initMap(): void  {
     // Creating a variable to hold this instance for use in smaller scoped functions.
     var _this = this;
 
     // Creates the map inside the div and centers on colorado
-    this.mainMap = L.map('mapID', {zoomControl: false, preferCanvas: false}).setView([this.mapConfig.lat, this.mapConfig.long], this.mapConfig.zoom);
+    this.mainMap = L.map('mapID', {
+      zoomControl: false,
+      preferCanvas: false,
+      wheelPxPerZoomLevel: 150,
+      zoomSnap: 0.1
+    }).setView([this.mapConfig.lat, this.mapConfig.long], this.mapConfig.zoom);
 
     // The background layer for the map
     this.background = L.tileLayer(this.mapConfig.tiles, {
@@ -480,6 +432,13 @@ export class MapComponent implements OnInit, OnDestroy {
     };
     legend.addTo(this.mainMap);
 
+    // Grabs data from CO_boundary.geojson and adds it to the map. Creates the black border around Colorado.
+    this.appService.getJSONData(this.mapConfig.state_border).subscribe((border: any) => {
+      _this.COBoundary = L.geoJSON(border, {style: this.setStateBoundaryStyle}).addTo(this.mainMap);
+      // Bring the border to the back of the layers, as it's only there for reference
+      _this.COBoundary.bringToBack();
+    });
+
   }
 
   /**
@@ -510,7 +469,7 @@ export class MapComponent implements OnInit, OnDestroy {
    * Called once, before the instance is destroyed.
    */
   ngOnDestroy(): void {
-    this.mobileQuery.removeEventListener("change", this.mobileQueryListener);
+    this.forkJoinSubscription$.unsubscribe();
   }
 
   /* This function is used for the CO_boundary style. It sets the weight of the line used

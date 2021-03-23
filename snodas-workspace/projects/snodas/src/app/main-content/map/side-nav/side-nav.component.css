@@ -1,5 +1,12 @@
 /* TAGS */
 
+/*  */
+button#animation-button {
+  background-color: #9DB66B;
+  margin: 0px 5px 0px 5px;
+  width: 15%;
+}
+
 /* Styling for all Graph buttons */
 button.graph-button {
   background-color: #9DB66B;
@@ -35,9 +42,27 @@ div#main {
   padding: 10px;
 }
 
-/* Styling for all h4 headers in the side-nav */
+/* Styling for all h3-6 headers in the side-nav */
 h3 {
   margin: 0px 0px 10px 0px;
+}
+
+h4 {
+  margin: 0px 0px 10px 0px;
+}
+
+h5 {
+  font-size: 18px;
+  margin: 0px 0px 8px 0px;
+}
+
+h6 {
+  margin: 8px 0px 0px 0px;
+}
+
+hr#divider {
+  color: black;
+  margin: 8px 0px 8px 0px;
 }
 
 /*  */
@@ -47,13 +72,22 @@ input#search {
   padding: 0px 10px 0px 10px;
 }
 
-/* Styling for the ID: and Name: properties under Selected Basin */
-p#current-basin-display {
-  margin: 4px 0px 4px 0px;
+mat-panel-title {
+  font-size: 18px;
+  margin-left: 15%;
+  text-decoration: underline;
 }
 
+/* Styling for the Name: and ID: properties under Selected Basin. */
+p#current-basin-display {
+  font-size: 14px;
+  margin: 0px 0px 0px 5%;
+  text-align: left;
+}
+
+/* Styling for the currently displayed human readable xxxx-xx-xx date under Current SNODAS Date. */
 span#current-date-display {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 /*  */
@@ -89,6 +123,11 @@ span#snodas-date {
 
 /* ID's */
 
+#animation-expansion-panel {
+  background-color: #e2e2e2;
+  text-align: center;
+}
+
 #basin-option {
   white-space: pre-wrap;
   line-height: 1;
@@ -98,6 +137,11 @@ span#snodas-date {
 #date-picker-form {
   width: 90%;
   padding: 0px;
+}
+
+#date-slider {
+  margin: 10px 0px 10px 0px;
+  width: 90%;
 }
 
 #day-increment-form {

@@ -14,40 +14,10 @@
     </mat-select>
   </mat-form-field>
 
-  <h3><u>Current SNODAS Date</u></h3>
+  <h5><u>Current SNODAS Date</u></h5>
   <span id="current-date-display">{{currentDateDisplay}}</span>
 
-  <hr><!-- Divider between the Select Date Form Field dropdown and the SNODAS animation Form Field -->
-
-  <h3><u>SNODAS Animation</u></h3>
-
-  <div id="date-picker">
-    <mat-form-field id="date-picker-form" appearance="fill">
-
-      <mat-label>Enter a date range</mat-label>
-      <mat-date-range-input [rangePicker]="picker" [min]="minDate" [max]="maxDate">
-        <input matStartDate placeholder="Start date">
-        <input matEndDate placeholder="End date">
-      </mat-date-range-input>
-      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-date-range-picker #picker [startAt]="minDate"></mat-date-range-picker>
-
-    </mat-form-field>
-  </div>
-
-  <div id="day-increment">
-    <mat-form-field id="day-increment-form">
-      <mat-label>Increment in days</mat-label>
-      <input matInput value="1">
-    </mat-form-field>
-  </div>
-
-  <button mat-raised-button
-          id="select-date">
-    Submit
-  </button>
-
-  <hr>
+  <hr id="divider"><!-- Divider between the SNODAS animation Form Field and Select Basin Form Field dropdown. -->
 
   <mat-form-field id="select-form" appearance="fill">
     <mat-label>Select Basin</mat-label>
@@ -64,7 +34,7 @@
     </mat-select>
   </mat-form-field>
 
-  <h3><u>Selected Basin</u></h3>
+  <h5><u>Selected Basin</u></h5>
   <div *ngIf="isBasinSelected === false">
     <p id="current-basin-display"><b>Name: </b>N/A</p>
     <p id="current-basin-display"><b>ID: </b>N/A</p>
@@ -75,34 +45,38 @@
     <p id="current-basin-display"><b>ID: </b>{{selectedBasinID}}</p>
   </div>
 
+  <h6><u>SNODAS Data Graphs</u></h6>
+
   <!-- The bottom 8 Basin Graph buttons. -->
   <button mat-raised-button
           class="graph-button"
           (click)="openImageDialog('-SNODAS-SnowCover.png')"
           [disabled]="isBasinSelected | menuDisable">
-    SNODAS Snow Cover Graph
+    Snow Cover Graph
   </button>
 
   <button mat-raised-button
           class="graph-button"
           (click)="openImageDialog('-SNODAS-SWE.png')"
           [disabled]="isBasinSelected | menuDisable">
-    SNODAS SWE Graph
+    SWE Graph
   </button>
 
   <!-- [disabled]="isBasinSelected | menuDisable" -->
   <button mat-raised-button
           class="graph-button"
-          disabled>
-    SNODAS SWE Volume Graph
+          (click)="openImageDialog('-SNODAS-SWE-Volume.png')"
+          [disabled]="isBasinSelected | menuDisable">
+    SWE Volume Graph
   </button>
 
   <!-- [disabled]="isBasinSelected | menuDisable" -->
   <button mat-raised-button
           id="multi-line"
           class="graph-button"
-          disabled>
-    SNODAS SWE Upstream Total Volume Graph
+          (click)="openImageDialog('-UpstreamTotal-SNODAS-SWE-Volume.png')"
+          [disabled]="isBasinSelected | menuDisable">
+    SWE Upstream Total Volume Graph
   </button>
 
   <button mat-raised-button
@@ -110,7 +84,7 @@
           class="graph-button"
           (click)="openImageDialog('-SNODAS-SWE-Volume-1WeekChange.png')"
           [disabled]="isBasinSelected | menuDisable">
-    SNODAS SWE 1 Week Change Graph
+    SWE 1 Week Change Graph
   </button>
 
   <button mat-raised-button
@@ -118,7 +92,7 @@
           class="graph-button"
           (click)="openImageDialog('-UpstreamTotal-SNODAS-SWE-Volume-Gain-Cumulative.png')"
           [disabled]="isBasinSelected | menuDisable">
-    SNODAS SWE Volume Gain, Cumulative Graph
+    SWE Volume Gain, Cumulative Graph
   </button>
 
   <button mat-raised-button
@@ -126,7 +100,62 @@
           class="graph-button"
           (click)="openImageDialog('-SNODAS-SWE-Volume-Gain-Cumulative.png')"
           [disabled]="isBasinSelected | menuDisable">
-    SNODAS SWE Upstream Total Volume Gain, Cumulative Graph
+    SWE Upstream Total Volume Gain, Cumulative Graph
   </button>
+
+  <!-- <h5><u>SNODAS Animation</u></h5> -->
+  <hr id="divider"><!-- Divider between the Select Date Form Field dropdown and the SNODAS animation Form Field. -->
+
+  <mat-accordion>
+    <mat-expansion-panel hideToggle id="animation-expansion-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          SNODAS Animation
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div id="date-picker">
+        <mat-form-field id="date-picker-form" appearance="fill">
+    
+          <mat-label>Enter a date range</mat-label>
+          <mat-date-range-input [rangePicker]="picker" [min]="minDate" [max]="maxDate">
+            <input matStartDate placeholder="Start date">
+            <input matEndDate placeholder="End date">
+          </mat-date-range-input>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker [startAt]="minDate"></mat-date-range-picker>
+    
+        </mat-form-field>
+      </div>
+    
+      <div id="day-increment">
+        <mat-form-field id="day-increment-form">
+          <mat-label>Increment in days</mat-label>
+          <input matInput value="1">
+        </mat-form-field>
+      </div>
+    
+      <button mat-raised-button
+              id="select-date">
+        Submit
+      </button>
+    
+      <mat-slider id="date-slider"
+                  color="primary">
+      </mat-slider>
+    
+      <button mat-raised-button id="animation-button">
+        <i class="fa fa-play" aria-hidden="true"></i>
+      </button>
+      <button mat-raised-button id="animation-button">
+        <i class="fa fa-pause" aria-hidden="true"></i>
+      </button>
+      <button mat-raised-button id="animation-button">
+        <i class="fa fa-fast-backward" aria-hidden="true"></i>
+      </button>
+
+    </mat-expansion-panel>
+  </mat-accordion>
+
   
 </div>
