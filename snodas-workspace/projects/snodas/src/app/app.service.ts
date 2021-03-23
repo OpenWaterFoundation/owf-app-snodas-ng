@@ -4,8 +4,7 @@ import { HttpClient }    from '@angular/common/http';
 import { catchError }    from 'rxjs/operators';
 import { forkJoin,
           Observable,
-          of, 
-          Subscription } from 'rxjs';
+          of }           from 'rxjs';
 
 
 @Injectable({
@@ -13,9 +12,13 @@ import { forkJoin,
 })
 export class AppService {
   /**
-   * The map configuration object, from `map-config.json`.
+   * The text containing the markdown from the `about.md` file in assets.
    */
-  public mapConfig: Object;
+  public aboutText: any;
+  /**
+   * The current date displayed on the map.
+   */
+  public currDate: string;
   /**
    * The list of basins.
    */
@@ -23,15 +26,40 @@ export class AppService {
   /**
    * The chart basin ID.
    */
-   public chartBasinID: any;
+  public chartBasinID: any;
   /**
    * The list of dates.
    */
   public dates: any;
   /**
-   * The current date displayed on the map.
+   * The hard-coded string of the path to the default icon path that will be used for the website if none is given.
    */
-  public currDate: string;
+  public readonly defaultFaviconPath = 'assets/img/OWF-Logo-Favicon-32x32.ico';
+  /**
+   * The text containing the markdown from the `documentation.md` file in assets.
+   */
+  public docText: any;
+  /**
+   * The boolean representing if a favicon path has been provided by the user.
+   */
+  public FAVICON_SET = false;
+  /**
+   * The path to the user-provided favicon .ico file.
+   */
+  public faviconPath: string;
+  /**
+   * Boolean representing whether the initial Leaflet map is being created, or if it has already been created.
+   */
+  public initMap = true;
+  /**
+   * The map configuration object, from `map-config.json`.
+   */
+  public mapConfig: Object;
+   /**
+    * Array to hold Leaflet map objects, for remembering state when switching between nav bar tabs.
+    */
+  public mapList: any[];
+  
 
 
   /**
@@ -40,6 +68,10 @@ export class AppService {
    */
   constructor(private http: HttpClient) { }
 
+
+  public addMap(map: any): void {
+    this.mapList.push(map);
+  }
 
   /* function that returns the list of basins in the map */ 
   public formatBasins(SNODAS_Geometry: any): any[] {
@@ -97,16 +129,53 @@ export class AppService {
   }
 
   /**
-   * Uses the HttpClient to perform a GET request and retrieves the contents of the `map-config.json` file in assets. This is
+   * Retrieves the read only default path to the OWF Logo Favicon.
+   * @returns The string representing the default Favicon path.
+   */
+  public getDefaultFaviconPath(): string {
+    return this.defaultFaviconPath;
+  }
+
+  public getMap(): any {
+    return this.mapList.pop();
+  }
+
+  /**
+   * Uses the HttpClient to perform a GET request and retrieves the contents of the `map-config.json` file, and any other
+   * files that are only once, e.g. About & Documentation markdown files. This is
    * done before app initialization.
    * @returns A promise.
    */
-  public loadMapConfig() {
-    return this.http.get('assets/map-config.json')
-      .toPromise()
-      .then(data => {
-        this.mapConfig = data;
-      });  
+  public async loadConfigFiles() {
+    // Map Configuration
+    const mapData = await this.http.get('assets/map-config.json')
+      .toPromise();
+    this.mapConfig = mapData;
+
+    // About Tab Text
+    const obj: Object = { responseType: 'text' as 'text' };
+    const aboutData = await this.http.get('assets/docs/about.md', obj)
+      .toPromise();
+    this.aboutText = aboutData;
+
+    // Documentation Tab Text
+    const docData = await this.http.get('assets/docs/documentation.md', obj)
+      .toPromise();
+    this.docText = docData;
+  }
+
+  /**
+   * @returns The text from the `about.md` markdown file.
+   */
+  public getAboutText(): any {
+    return this.aboutText;
+  }
+
+  /**
+   * @returns The text from the `documentation.md` markdown file.
+   */
+  public getDocText(): any {
+    return this.docText;
   }
 
   /**
@@ -163,6 +232,21 @@ export class AppService {
 
       return of(result as T)
     }
+  }
+
+  /**
+   * 
+   * @returns Whether the Leaflet map is being created for the first time.
+   */
+  public isInitMap(): boolean {
+    return this.initMap;
+  }
+
+  /**
+   * 
+   */
+  public mapCreated(): void {
+    this.initMap = false;
   }
 
   /**

@@ -126,8 +126,6 @@ export class SideNavComponent implements OnInit {
     }
 
     var fullImagePath: string;
-    console.log(this.selectedBasinID);
-    console.log(isNaN(parseInt(this.selectedBasinID)));
     if (graphType === '-SNODAS-SWE-Volume.png' ||
         graphType === 'UpstreamTotal-SNODAS-SWE-Volume.png' ||
         isNaN(parseInt(this.selectedBasinID))) {
@@ -150,12 +148,12 @@ export class SideNavComponent implements OnInit {
       // open at the same time.
       hasBackdrop: false,
       panelClass: ['custom-dialog-container', 'mat-elevation-z20'],
-      height: "760px",
+      height: "800px",
       width: "900px",
-      minHeight: "760px",
-      minWidth: "900px",
-      maxHeight: "760px",
-      maxWidth: "900px"
+      minHeight: "560px",
+      minWidth: "525px",
+      maxHeight: "65vh",
+      maxWidth: "80vw"
     });
     this.windowManager.addWindow(windowID, WindowType.DOC);
   }

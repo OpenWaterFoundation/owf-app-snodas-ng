@@ -91,4 +91,9 @@ hand corner of the Dialog do not appear to the user. */
   font-weight: 400;
 }
 
+/* Styling for the padding inside of a Material expanded body, after a click. */
+.mat-expansion-panel-content > .mat-expansion-panel-body {
+  padding: 0px 2.5% 16px;
+}
+
 /* ID's */

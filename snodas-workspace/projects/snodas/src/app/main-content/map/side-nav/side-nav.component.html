@@ -80,7 +80,6 @@
   </button>
 
   <button mat-raised-button
-          id="multi-line"
           class="graph-button"
           (click)="openImageDialog('-SNODAS-SWE-Volume-1WeekChange.png')"
           [disabled]="isBasinSelected | menuDisable">
@@ -117,10 +116,13 @@
       <div id="date-picker">
         <mat-form-field id="date-picker-form" appearance="fill">
     
-          <mat-label>Enter a date range</mat-label>
-          <mat-date-range-input [rangePicker]="picker" [min]="minDate" [max]="maxDate">
-            <input matStartDate placeholder="Start date">
-            <input matEndDate placeholder="End date">
+          <mat-label>Enter an ISO date range</mat-label>
+          <mat-date-range-input [rangePicker]="picker"
+                                [min]="minDate"
+                                [max]="maxDate"
+                                separator="to">
+            <input matStartDate class="range-input" placeholder="YYYY-MM-DD">
+            <input matEndDate class="range-input" placeholder="YYYY-MM-DD">
           </mat-date-range-input>
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-date-range-picker #picker [startAt]="minDate"></mat-date-range-picker>
