@@ -10,13 +10,14 @@ button#animation-button {
 /* Styling for all Graph buttons */
 button.graph-button {
   background-color: #9DB66B;
-  margin: 10px 0px 10px 0px;
+  margin: 5px 0px 5px 0px;
   white-space: pre-wrap;
   width: 90%;
 }
 
 /* For any Graph buttons that contain text with more than one line, shrink the line-height. */
 button#multi-line {
+  background-color: #9DB66B;
   line-height: 1.5;
 }
 
@@ -25,14 +26,23 @@ button#select-date {
   background-color: #9DB66B;
 }
 
+button#single-line {
+  background-color: #9DB66B;
+  height: 32px;
+}
+
 /* This date-picker div id was created to give guidance to the font size of the Angular Material's date-picker input field.
 The size of the input box is dependant on the font size, so decreasing the font size will decrease the large default box. */
 div#date-picker {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 div#day-increment {
-  font-size: 16px;
+  font-size: 13px;
+}
+
+div.mat-form-field-wrapper {
+  padding: 0px;
 }
 
 /* Styling for the side-nav top-level div */
@@ -53,16 +63,16 @@ h4 {
 
 h5 {
   font-size: 18px;
-  margin: 0px 0px 8px 0px;
+  margin: 0px;
 }
 
 h6 {
-  margin: 8px 0px 0px 0px;
+  margin: 8px 0px 4px 0px;
 }
 
 hr#divider {
   color: black;
-  margin: 8px 0px 8px 0px;
+  margin: 0px 0px 4px 0px;
 }
 
 /*  */
@@ -80,7 +90,7 @@ mat-panel-title {
 
 /* Styling for the Name: and ID: properties under Selected Basin. */
 p#current-basin-display {
-  font-size: 14px;
+  font-size: 13px;
   margin: 0px 0px 0px 5%;
   text-align: left;
 }
@@ -147,7 +157,7 @@ input.range-input::placeholder {
 }
 
 #date-slider {
-  margin: 10px 0px 10px 0px;
+  margin: 0px;
   width: 90%;
 }
 
@@ -159,6 +169,6 @@ input.range-input::placeholder {
 /* Styling for the Select Date Form */
 #select-form {
   padding: 0px;
-  font-size: 14px;
+  font-size: 13px;
   width: 90%;
 }

@@ -45,53 +45,59 @@
     <p id="current-basin-display"><b>ID: </b>{{selectedBasinID}}</p>
   </div>
 
-  <h6><u>SNODAS Data Graphs</u></h6>
+  <h6 matTooltip="Select a basin to view data graphs"
+      [matTooltipShowDelay]="750"
+      matTooltipPosition="below">
+    <u>SNODAS Data Graphs</u>
+  </h6>
 
   <!-- The bottom 8 Basin Graph buttons. -->
   <button mat-raised-button
+          id="single-line"
           class="graph-button"
           (click)="openImageDialog('-SNODAS-SnowCover.png')"
           [disabled]="isBasinSelected | menuDisable">
-    Snow Cover Graph
+    Snow Cover
   </button>
 
   <button mat-raised-button
+          id="single-line"
           class="graph-button"
           (click)="openImageDialog('-SNODAS-SWE.png')"
           [disabled]="isBasinSelected | menuDisable">
-    SWE Graph
+    SWE
   </button>
 
-  <!-- [disabled]="isBasinSelected | menuDisable" -->
   <button mat-raised-button
+          id="single-line"
           class="graph-button"
           (click)="openImageDialog('-SNODAS-SWE-Volume.png')"
           [disabled]="isBasinSelected | menuDisable">
-    SWE Volume Graph
+    SWE Volume
   </button>
 
-  <!-- [disabled]="isBasinSelected | menuDisable" -->
   <button mat-raised-button
-          id="multi-line"
+          id="single-line"
           class="graph-button"
           (click)="openImageDialog('-UpstreamTotal-SNODAS-SWE-Volume.png')"
           [disabled]="isBasinSelected | menuDisable">
-    SWE Upstream Total Volume Graph
+    SWE Upstream Total Volume
   </button>
 
   <button mat-raised-button
+          id="single-line"
           class="graph-button"
           (click)="openImageDialog('-SNODAS-SWE-Volume-1WeekChange.png')"
           [disabled]="isBasinSelected | menuDisable">
-    SWE 1 Week Change Graph
+    SWE 1 Week Change
   </button>
 
   <button mat-raised-button
-          id="multi-line"
+          id="single-line"
           class="graph-button"
           (click)="openImageDialog('-UpstreamTotal-SNODAS-SWE-Volume-Gain-Cumulative.png')"
           [disabled]="isBasinSelected | menuDisable">
-    SWE Volume Gain, Cumulative Graph
+    SWE Volume Gain, Cumulative
   </button>
 
   <button mat-raised-button
@@ -99,15 +105,15 @@
           class="graph-button"
           (click)="openImageDialog('-SNODAS-SWE-Volume-Gain-Cumulative.png')"
           [disabled]="isBasinSelected | menuDisable">
-    SWE Upstream Total Volume Gain, Cumulative Graph
+    SWE Upstream Total Volume Gain, Cumulative
   </button>
 
-  <!-- <h5><u>SNODAS Animation</u></h5> -->
-  <hr id="divider"><!-- Divider between the Select Date Form Field dropdown and the SNODAS animation Form Field. -->
+  <!-- Divider between the Select Date Form Field dropdown and the SNODAS animation Form Field. -->
+  <hr id="divider">
 
   <mat-accordion>
     <mat-expansion-panel hideToggle id="animation-expansion-panel">
-      <mat-expansion-panel-header>
+      <mat-expansion-panel-header [collapsedHeight]="'36px'" [expandedHeight]="'36px'">
         <mat-panel-title>
           SNODAS Animation
         </mat-panel-title>
@@ -116,13 +122,13 @@
       <div id="date-picker">
         <mat-form-field id="date-picker-form" appearance="fill">
     
-          <mat-label>Enter an ISO date range</mat-label>
+          <mat-label>Enter a date range</mat-label>
           <mat-date-range-input [rangePicker]="picker"
                                 [min]="minDate"
                                 [max]="maxDate"
                                 separator="to">
-            <input matStartDate class="range-input" placeholder="YYYY-MM-DD">
-            <input matEndDate class="range-input" placeholder="YYYY-MM-DD">
+            <input matStartDate class="range-input" placeholder="Start Date">
+            <input matEndDate class="range-input" placeholder="End Date">
           </mat-date-range-input>
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-date-range-picker #picker [startAt]="minDate"></mat-date-range-picker>
@@ -137,22 +143,44 @@
         </mat-form-field>
       </div>
     
+      <!-- This might not be needed in the future. Instead of pressing Submit button, the given date range and day
+      increment field could just be used and overridden if updated. -->
       <button mat-raised-button
-              id="select-date">
+              id="select-date"
+              (click)="onAnimationSubmit()"
+              matTooltip="Submit dates & day increment for animation"
+              [matTooltipShowDelay]="750"
+              matTooltipPosition="below">
         Submit
       </button>
     
       <mat-slider id="date-slider"
-                  color="primary">
+                  color="primary"
+                  [disabled]="animationSubmit | menuDisable">
       </mat-slider>
     
-      <button mat-raised-button id="animation-button">
+      <button mat-raised-button
+              id="animation-button"
+              [disabled]="animationSubmit | menuDisable"
+              matTooltip="Start animation"
+              [matTooltipShowDelay]="750"
+              matTooltipPosition="above">
         <i class="fa fa-play" aria-hidden="true"></i>
       </button>
-      <button mat-raised-button id="animation-button">
+      <button mat-raised-button
+              id="animation-button"
+              [disabled]="animationSubmit | menuDisable"
+              matTooltip="Pause animation"
+              [matTooltipShowDelay]="750"
+              matTooltipPosition="above">
         <i class="fa fa-pause" aria-hidden="true"></i>
       </button>
-      <button mat-raised-button id="animation-button">
+      <button mat-raised-button
+              id="animation-button"
+              [disabled]="animationSubmit | menuDisable"
+              matTooltip="Restart animation"
+              [matTooltipShowDelay]="750"
+              matTooltipPosition="above">
         <i class="fa fa-fast-backward" aria-hidden="true"></i>
       </button>
 

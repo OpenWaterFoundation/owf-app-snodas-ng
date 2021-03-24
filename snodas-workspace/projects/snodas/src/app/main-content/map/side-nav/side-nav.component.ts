@@ -30,7 +30,11 @@ export class SideNavComponent implements OnInit {
    */
   public allDates: string[];
   /**
-   * 
+   * Boolean describing whether the animation button has been clicked.
+   */
+  public animationSubmit: boolean;
+  /**
+   * Boolean describing whether a basin has been clicked.
    */
   public isBasinSelected = false;
   /**
@@ -185,6 +189,10 @@ export class SideNavComponent implements OnInit {
       this.selectedBasinID = basinID;
       this.selectedBasinName = this.getBasinName(basinID);
     })
+  }
+
+  public onAnimationSubmit(): void {
+    this.animationSubmit = true;
   }
 
   /**

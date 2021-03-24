@@ -392,12 +392,12 @@ export class MapComponent implements OnInit, OnDestroy {
     // Bottom right corner. Shows the current lat and long of the mouse cursor as 'º'.
     L.control.mousePosition({position: 'bottomright',lngFormatter: function(num: number) {
       var direction = (num < 0) ? 'W' : 'E';
-      var formatted = Math.abs(L.Util.formatNum(num, 3)) + 'º ' + direction;
+      var formatted = Math.abs(num).toFixed(6) + 'º ' + direction;
       return formatted;
       },
       latFormatter: function(num: number) {
         var direction = (num < 0) ? 'S' : 'N';
-        var formatted = Math.abs(L.Util.formatNum(num, 3)) + 'º ' + direction;
+        var formatted = Math.abs(num).toFixed(6) + 'º ' + direction;
         return formatted;
     }}).addTo(this.mainMap);
 
