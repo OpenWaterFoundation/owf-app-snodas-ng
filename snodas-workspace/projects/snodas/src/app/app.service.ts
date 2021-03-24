@@ -1,5 +1,6 @@
 import { Injectable }    from '@angular/core';
-import { HttpClient }    from '@angular/common/http';
+import { HttpClient, 
+          HttpHeaders }  from '@angular/common/http';
 
 import { catchError }    from 'rxjs/operators';
 import { forkJoin,
@@ -34,7 +35,7 @@ export class AppService {
   /**
    * The hard-coded string of the path to the default icon path that will be used for the website if none is given.
    */
-  public readonly defaultFaviconPath = 'assets/img/OWF-Logo-Favicon-32x32.ico';
+  public readonly defaultFaviconPath = 'assets/img/coloradoDNR.ico';
   /**
    * The text containing the markdown from the `documentation.md` file in assets.
    */
@@ -75,20 +76,36 @@ export class AppService {
 
   /* function that returns the list of basins in the map */ 
   public formatBasins(SNODAS_Geometry: any): any[] {
-    SNODAS_Geometry.features.sort(function(a,b){
-      if (a["properties"]["LOCAL_NAME"].toLowerCase() < b["properties"]["LOCAL_NAME"].toLowerCase()) return -1;
-      if (a["properties"]["LOCAL_NAME"].toLowerCase() > b["properties"]["LOCAL_NAME"].toLowerCase()) return 1;
-      if (a["properties"]["LOCAL_NAME"].toLowerCase() == b["properties"]["LOCAL_NAME"].toLowerCase())
-      {
-        if (a["properties"]["LOCAL_ID"].toLowerCase() < b["properties"]["LOCAL_ID"].toLowerCase()) return -1;
-        if (a["properties"]["LOCAL_ID"].toLowerCase() > b["properties"]["LOCAL_ID"].toLowerCase()) return 1;
+    SNODAS_Geometry.features.sort(function(a: any, b: any) {
+      if (a["properties"]["LOCAL_NAME"].toLowerCase() < b["properties"]["LOCAL_NAME"].toLowerCase()) {
+        return -1;
+      }
+      if (a["properties"]["LOCAL_NAME"].toLowerCase() > b["properties"]["LOCAL_NAME"].toLowerCase()) {
+        return 1;
+      }
+      if (a["properties"]["LOCAL_NAME"].toLowerCase() == b["properties"]["LOCAL_NAME"].toLowerCase()) {
+        if (a["properties"]["LOCAL_ID"].toLowerCase() < b["properties"]["LOCAL_ID"].toLowerCase()) {
+          return -1;
+        }
+        if (a["properties"]["LOCAL_ID"].toLowerCase() > b["properties"]["LOCAL_ID"].toLowerCase()) {
+          return 1;
+        }
         return
       }
       return 0;
     });
     var list = [];
+    var basinsToDownload: string[] = [];
+    var alreadyDownloaded: string[] = [];
     for(var index in SNODAS_Geometry.features) {
-      list[index] = (SNODAS_Geometry.features[index]["properties"]["LOCAL_NAME"] + " (" + SNODAS_Geometry.features[index]["properties"]["LOCAL_ID"] + ")");
+      list[index] = (SNODAS_Geometry.features[index]["properties"]["LOCAL_NAME"] +
+      " (" + SNODAS_Geometry.features[index]["properties"]["LOCAL_ID"] + ")");
+
+      if (isNaN(parseInt(SNODAS_Geometry.features[index]["properties"]["LOCAL_ID"]))) {
+        basinsToDownload.push(SNODAS_Geometry.features[index]["properties"]["LOCAL_ID"]);
+      } else {
+        alreadyDownloaded.push(SNODAS_Geometry.features[index]["properties"]["LOCAL_ID"]);
+      }
     }
     return list;
   }
@@ -136,32 +153,12 @@ export class AppService {
     return this.defaultFaviconPath;
   }
 
+  /**
+   * 
+   * @returns 
+   */
   public getMap(): any {
     return this.mapList.pop();
-  }
-
-  /**
-   * Uses the HttpClient to perform a GET request and retrieves the contents of the `map-config.json` file, and any other
-   * files that are only once, e.g. About & Documentation markdown files. This is
-   * done before app initialization.
-   * @returns A promise.
-   */
-  public async loadConfigFiles() {
-    // Map Configuration
-    const mapData = await this.http.get('assets/map-config.json')
-      .toPromise();
-    this.mapConfig = mapData;
-
-    // About Tab Text
-    const obj: Object = { responseType: 'text' as 'text' };
-    const aboutData = await this.http.get('assets/docs/about.md', obj)
-      .toPromise();
-    this.aboutText = aboutData;
-
-    // Documentation Tab Text
-    const docData = await this.http.get('assets/docs/documentation.md', obj)
-      .toPromise();
-    this.docText = docData;
   }
 
   /**
@@ -213,8 +210,15 @@ export class AppService {
    */
    public getPlainText(path: string): Observable<any> {
     // This next line is important, as it tells our response that it needs to return plain text, not a default JSON object.
-    const obj: Object = { responseType: 'text' as 'text' };
-    return this.http.get<any>(path, obj)
+      
+    const options: Object = {
+      headers: new HttpHeaders({
+        // 'Access-Control-Request-Method': 'GET'
+        'content-type': 'text/plain'
+      }),
+      responseType: 'text' as 'text'
+    };
+    return this.http.get<any>(path, options)
     .pipe(
       catchError(this.handleError<any>(path))
     );
@@ -240,6 +244,30 @@ export class AppService {
    */
   public isInitMap(): boolean {
     return this.initMap;
+  }
+
+  /**
+   * Uses the HttpClient to perform a GET request and retrieves the contents of the `map-config.json` file, and any other
+   * files that are only once, e.g. About & Documentation markdown files. This is
+   * done before app initialization.
+   * @returns A promise.
+   */
+   public async loadConfigFiles() {
+    // Map Configuration
+    const mapData = await this.http.get('assets/map-config.json')
+      .toPromise();
+    this.mapConfig = mapData;
+
+    // About Tab Text
+    const obj: Object = { responseType: 'text' as 'text' };
+    const aboutData = await this.http.get('assets/docs/about.md', obj)
+      .toPromise();
+    this.aboutText = aboutData;
+
+    // Documentation Tab Text
+    const docData = await this.http.get('assets/docs/documentation.md', obj)
+      .toPromise();
+    this.docText = docData;
   }
 
   /**
@@ -271,10 +299,10 @@ export class AppService {
    * @returns The list of dates for the map.
    */
    public setDates(data: any) {
-    var text = new Array();
+    var text: string[] = [];
     text = data.split('\n');
     /* Sort the dates in descending order (Most recent day first) */
-    text.sort(function(a, b) {
+    text.sort(function(a: any, b: any) {
         return b - a;
     });
     /* trim each element. The split function keeps the newline
@@ -293,6 +321,7 @@ export class AppService {
     var asyncData: Observable<any>[] = [];
 
     asyncData.push(
+      // this.getPlainText('http://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/ListOfDates.txt'),
       this.getPlainText('assets/SnowpackStatisticsByDate/ListOfDates.txt'),
       this.getJSONData(this.mapConfig['SNODAS_boundaries'])
     );
