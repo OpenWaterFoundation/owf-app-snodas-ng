@@ -20,63 +20,37 @@ declare var L: any;
   styleUrls: ['./map.component.css']
 })
 export class MapComponent implements OnInit, OnDestroy {
-  /**
-   * The background layer of the map.
-   */
+  /** The background layer of the map. */
   public background: any;
-  /**
-   * The Leaflet layer containing the Colorado boundary.
-   */
+  /** The Leaflet layer containing the Colorado boundary. */
   public COBoundary: any;
-  /**
-   * The human readable version of the current date being displayed on the map.
-   */
+  /** The human readable version of the current date being displayed on the map. */
   public currentDateDisplay: string;
-  /**
-   * Subject used to send information to the side-nav Component as an event when a basin is clicked.
-   */
+  /** Subject used to send information to the side-nav Component as an event when a basin is clicked. */
   public eventsSubject: Subject<string> = new Subject<string>();
-  /**
-   * Class variable for the Leaflet map's config file subscription object so it can be closed on this component's destruction.
-   */
+  /** Class variable for the Leaflet map config file subscription object so it can be closed on this component's destruction. */
   private forkJoinSubscription$ = <any>Subscription;
-  /**
-   * The main Leaflet map.
-   */
+  /** The main Leaflet map. */
   public mainMap: any;
-  /**
-   * The map configuration object obtained from map-config.json.
-   */
+  /** The map configuration object obtained from map-config.json. */
   public mapConfig: any;
-  /**
-   * Unknown.
-   */
+  /** Unknown. */
   public mobileQuery: MediaQueryList;
-  /**
-   * GeoJSON layers on the map.
-   */
-  public geojson: any;
-  /**
-   * Info panel on  bottom left of the map.
-   */
+  /** GeoJSON layer containing the merged SNODAS basin boundary geoJSON file and CSV file data of the basin by date. */
+  public basinBoundaryWithData: any;
+  /** Info panel on bottom left of the map. */
   public info: any;
-  /**
-   * Date display on top left of the map.
-   */
+  /** Date display on top left of the map. */
   public mapDate: any;
-  /**
-   * The object containing the SNODAS basins data from the SNODAS_boundaries property in the map config file.
-   */
+  /** The object containing the SNODAS basins data from the SNODAS_boundaries property in the map config file. */
   public SNODAS_Geometry: any;
-  /**
-   * Upper left zoom home map control.
-   */
+  /** Upper left zoom home map control. */
   public zoomHome: any;
 
 
   /**
-   * 
-   * @param appService 
+   * @constructor Injects this component with the app service for network requests and global data.
+   * @param appService The reference to the application service for retrieving data over the network and holding global data.
    */
   constructor(private appService: AppService) {
 
@@ -94,24 +68,6 @@ export class MapComponent implements OnInit, OnDestroy {
     var _this = this;
     // Set the current date in the app service. This could be the same date if for example, a basin is selected.
     this.appService.setCurrDate(currDate);
-    // Add the render to the map every time it is built. This might not be needed.
-    // L.svg().addTo(this.mainMap);
-
-    // Remove all controls. May not be needed?
-    if (defined === true) {
-      this.info.remove();
-      this.mapDate.remove();
-      this.zoomHome.remove();
-    }
-    // Loops through all the layers and removes them if they are defined and not the background layer
-    // this.mainMap.eachLayer(function (layer: any) {
-    //   if(layer != _this.background && layer != null && typeof(layer) != "undefined" && _this.mainMap != "undefined"){
-    //       _this.mainMap.removeLayer(layer);
-    //   }
-    // });
-    if (this.geojson) {
-      this.mainMap.removeLayer(this.geojson);
-    }
 
     // After the initial creation of the map, the COBoundary layer is stored in a class variable so it can be quickly added back
     // onto the map each time the buildMap function is called.
@@ -119,13 +75,24 @@ export class MapComponent implements OnInit, OnDestroy {
       this.mainMap.addLayer(this.COBoundary);
       this.COBoundary.bringToBack();
     }
-      
 
-    // This grabs the SNODAS data from the SnowpackbyDate_(CURRENT DATE).csv file. It then assigns that data to the
-    // SNODAS_Statistics variable.
-    var SNODASFile = "assets/SnowpackStatisticsByDate/SnowpackStatisticsByDate_" + currDate + ".csv";
-    // Build the string to be displayed
-    var temp = SNODASFile.replace("assets/SnowpackStatisticsByDate/SnowpackStatisticsByDate_", "").replace(".csv", "");
+    // The CSV file to parse.
+    var SNODASFile: string;
+    // The temporary variable to hold the path/URL to the CSV file. To be manipulated for the displaying of the date.
+    var temp: string;
+
+    if (this.appService.getDevEnv() === true) {
+      // This grabs the SNODAS data from the SnowpackbyDate_(CURRENT DATE).csv file. It then assigns that data to the
+      // SNODAS_Statistics variable.
+      SNODASFile = "assets/SnowpackStatisticsByDate/SnowpackStatisticsByDate_" + currDate + ".csv";
+      // Build the string to be displayed
+      temp = SNODASFile.replace("assets/SnowpackStatisticsByDate/SnowpackStatisticsByDate_", "").replace(".csv", "");
+    } else {
+      SNODASFile = 'http://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_' + currDate + '.csv';
+      temp = SNODASFile.replace("http://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_", "")
+      .replace(".csv", "");
+    }
+    // Create the more human-readable date format to be displayed.
     this.currentDateDisplay = temp.substr(0,4) + "-" + temp.substr(4,2) + "-" + temp.substr(6,2);
     // Use Papaparse to read the CSV file
     Papa.parse(SNODASFile, {
@@ -134,11 +101,16 @@ export class MapComponent implements OnInit, OnDestroy {
       comments: "#",
       skipEmptyLines: true,
       complete: (result: any, file: any) => {
-        /* This call below merges the Geometry data with the statistics of each basin.
-        It then adds that merged object to the map as a layer allowing users to see
-        the SNODAS data visually on the map. */
-        _this.geojson = L.geoJson(MergeData(_this.SNODAS_Geometry,result),
-        {style: setSWELayerStyle, onEachFeature: onEachFeature}).addTo(_this.mainMap);
+        // Update the upper left control displaying the current date.
+        this.mapDate.update();
+        // Right before the newly merged data geoJSON is created and added to the map, remove the old version. This will make
+        // the transition indistinguishable to a user.
+        if (this.basinBoundaryWithData) {
+          this.mainMap.removeLayer(this.basinBoundaryWithData);
+        }
+        // Merge the basin boundary data with the statistics of each basin, then add that object to the map.
+        this.basinBoundaryWithData = L.geoJson(MergeData(this.SNODAS_Geometry,result),
+        {style: setSWELayerStyle, onEachFeature: onEachFeature}).addTo(this.mainMap);
 
         // SelectBasinCall is set to true when the ClickOnMapItem function is called.
         var selectBasinCall = false;
@@ -202,64 +174,11 @@ export class MapComponent implements OnInit, OnDestroy {
           if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
             layer.bringToFront();
           }
-  
+
           _this.info.update(layer.feature.properties);
         }
 
-        // Top left corner of the map. Shows the current date the map is displaying
-        this.mapDate = L.control({position: 'topleft'});
-
-        this.mapDate.onAdd = function(map: any){
-          this._div = L.DomUtil.create('div', 'mapDate');
-          this.update();
-          return this._div;
-        };
-
-        this.mapDate.update = function() {
-          this._div.innerHTML = '<h4>' + 'Map Data Date: ' + currDate.substr(0,4) + '-' + currDate.substr(4,2) + '-' +
-          currDate.substr(6,2) + "</h4>";
-        };
-
-        this.mapDate.addTo(this.mainMap);
-
-        /* Top Left Corner of Map. Allows for a home button to reset
-        to the default zoom. */
-        this.zoomHome = L.Control.zoomHome({
-          position: 'topleft',
-          zoomHomeTitle: 'Zoom to initial extent'
-        });
-        this.zoomHome.addTo(this.mainMap);
-
-        /* The below code is used to create the informational legend on the map.
-        info.update is used to call the statistics for each basin. */
-        this.info = L.control({position: 'bottomleft'});
-
-        this.info.onAdd = function(map: any){
-          this._div = L.DomUtil.create('div', 'info');
-          this.update();
-          return this._div;
-        };
-
-        /* The code below is what shows up in the Daily Basin Statistics informational
-        legend in the bottom left corner of the map. */
-        this.info.update = function(props: any) {
-          this._div.innerHTML = '<h4> Daily Basin Statistics </h4>' +  (props ? "<br><b>Local Basin Name: </b>" + props.LOCAL_NAME +
-          "<br><b>Local Basin ID: </b>" + props.LOCAL_ID + "<br>" + "<br><b><u> SWE</b></u>" + "<br><b>Mean: </b>"
-          + Math.round(props.SNODAS_SWE_Mean_mm).toLocaleString('en-US') + " mm | "
-          + Number(props.SNODAS_SWE_Mean_in).toLocaleString('en-US',{minimumFractionDigits: 1}) + " in"
-          + "<br><b>Effective Area: </b>"
-          + Number(props.SNODAS_EffectiveArea_sqmi).toLocaleString('en-US', {minimumFractionDigits: 1}) + " sqmi"
-          + "<br><b>Volume: </b>"
-          + Math.round(props.SNODAS_SWE_Volume_acft).toLocaleString('en-US') + " acft"
-          + "<br><b>Volume 1 Week Change: </b>"
-          + Math.round(props.SNODAS_SWE_Volume_1WeekChange_acft).toLocaleString('en-US') + " acft"
-          + "<br>" + "<br><b>Snow Cover: </b>"
-          + Math.round(props.SNODAS_SnowCover_percent).toLocaleString('en-US') + "%"
-          :'Hover over a basin');
-        };
-
-        /* This will add the information legend to the leaflet map */
-        this.info.addTo(this.mainMap);
+        
 
         /**
          * Called by onEachFeature. It is used once a basin has been highlighted, then the user moves the mouse it will
@@ -269,11 +188,11 @@ export class MapComponent implements OnInit, OnDestroy {
         function resetHighlight(e: any) {
           if(!e.target.feature.properties.hasBeenSelected)
           {
-            _this.geojson.resetStyle(e.target);
+            _this.basinBoundaryWithData.resetStyle(e.target);
             _this.info.update();
             if(selectBasinCall === true)
             {
-              var layer = _this.geojson.getLayer(e.target.feature.properties.LOCAL_ID);
+              var layer = _this.basinBoundaryWithData.getLayer(e.target.feature.properties.LOCAL_ID);
               layer.fireEvent('mouseover');
               selectBasinCall = false;
             }
@@ -318,18 +237,18 @@ export class MapComponent implements OnInit, OnDestroy {
         }
 
         function clickOnMapItem(Local_ID: string) {
-          // Once a basin has been clicked, use the eventsSubject Subject (which is also an observable and observer) and use the
+          // Once a basin has been clicked, use the eventsSubject Subject (which is also an observable and observer) and uses the
           // next method to send the selected basin's ID to the child side-nav component as an event.
           _this.eventsSubject.next(Local_ID);
           if(basinSelected === true){
-            var oldLayer = _this.geojson.getLayer(oldBasin);
+            var oldLayer = _this.basinBoundaryWithData.getLayer(oldBasin);
             oldLayer.feature.properties.hasBeenSelected = false;
             oldLayer.fireEvent('mouseout');
           }
           var id = Local_ID;
           oldBasin = Local_ID;
           //get target layer by it's id
-          var layer = _this.geojson.getLayer(id);
+          var layer = _this.basinBoundaryWithData.getLayer(id);
           //fire event 'click' on target layer
           layer.fireEvent('mouseover');
           layer.feature.properties.hasBeenSelected = true;
@@ -370,18 +289,35 @@ export class MapComponent implements OnInit, OnDestroy {
   /**
    * Initializes the Leaflet map when the Map Component is created. Is only called once, with subsequent updates using the
    * buildMap function.
+   * @param currDate The current date of the initial display of the map.
    */
   private initMap(): void  {
-    // Creating a variable to hold this instance for use in smaller scoped functions.
+    /** Hold this class instance for use in smaller scoped functions that contain their own `this`. */
     var _this = this;
 
-    // Creates the map inside the div and centers on colorado
+    // Creates the map inside the div and centers on Colorado. Uses the leafletConfig object to set the view and zoom on the
+    // map, as 
     this.mainMap = L.map('mapID', {
       zoomControl: false,
       preferCanvas: false,
       wheelPxPerZoomLevel: 150,
       zoomSnap: 0.1
     }).setView([this.mapConfig.lat, this.mapConfig.long], this.mapConfig.zoom);
+
+    // var change = this.appService.checkIfMapChanged();
+    // console.log(change);
+
+    // if (change === true) {
+    //   this.mainMap.setView([this.appService.getLeafletConfig()['lat'], this.appService.getLeafletConfig()['long']],
+    //   this.appService.getLeafletConfig()['zoom']);
+    // }
+
+    // this.mainMap.on('move', function() {
+    //   _this.appService.setLeafletConfigProp('zoom', _this.mainMap.getZoom());
+    //   var mapCenter = _this.mainMap.getBounds().getCenter();
+    //   _this.appService.setLeafletConfigProp('lat', mapCenter['lat']);
+    //   _this.appService.setLeafletConfigProp('long', mapCenter['lng']);
+    // });    
 
     // The background layer for the map
     this.background = L.tileLayer(this.mapConfig.tiles, {
@@ -439,34 +375,95 @@ export class MapComponent implements OnInit, OnDestroy {
       _this.COBoundary.bringToBack();
     });
 
+    // Top left corner of the map. Shows the current date the map is displaying
+    this.mapDate = L.control({position: 'topleft'});
+
+    this.mapDate.onAdd = function(map: any){
+      this._div = L.DomUtil.create('div', 'mapDate');
+      this.update();
+      return this._div;
+    };
+
+    this.mapDate.update = function() {
+      this._div.innerHTML = '<h4>' + 'Map Data Date: ' + _this.appService.getCurrDate().substr(0,4) + '-' +
+      _this.appService.getCurrDate().substr(4,2) + '-' + _this.appService.getCurrDate().substr(6,2) + "</h4>";
+    };
+
+    this.mapDate.addTo(this.mainMap);
+
+    // Create the legend for daily basin statistics on the map.
+    this.info = L.control({ position: 'bottomleft' });
+
+    this.info.onAdd = function(map: any){
+      this._div = L.DomUtil.create('div', 'info');
+      this.update();
+      return this._div;
+    };
+
+    /* The code below is what shows up in the Daily Basin Statistics informational
+    legend in the bottom left corner of the map. */
+    this.info.update = function(props: any) {
+      this._div.innerHTML = '<h4> Daily Basin Statistics </h4>' +  (props ? "<br><b>Local Basin Name: </b>" + props.LOCAL_NAME +
+      "<br><b>Local Basin ID: </b>" + props.LOCAL_ID + "<br>" + "<br><b><u> SWE</b></u>" + "<br><b>Mean: </b>"
+      + Math.round(props.SNODAS_SWE_Mean_mm).toLocaleString('en-US') + " mm | "
+      + Number(props.SNODAS_SWE_Mean_in).toLocaleString('en-US',{minimumFractionDigits: 1}) + " in"
+      + "<br><b>Effective Area: </b>"
+      + Number(props.SNODAS_EffectiveArea_sqmi).toLocaleString('en-US', {minimumFractionDigits: 1}) + " sqmi"
+      + "<br><b>Volume: </b>"
+      + Math.round(props.SNODAS_SWE_Volume_acft).toLocaleString('en-US') + " acft"
+      + "<br><b>Volume 1 Week Change: </b>"
+      + Math.round(props.SNODAS_SWE_Volume_1WeekChange_acft).toLocaleString('en-US') + " acft"
+      + "<br>" + "<br><b>Snow Cover: </b>"
+      + Math.round(props.SNODAS_SnowCover_percent).toLocaleString('en-US') + "%"
+      :'Hover over a basin');
+    };
+
+    /* This will add the information legend to the leaflet map */
+    this.info.addTo(this.mainMap);
+
+    /* Top Left Corner of Map. Allows for a home button to reset
+      to the default zoom. */
+      this.zoomHome = L.Control.zoomHome({
+        position: 'topleft',
+        zoomHomeTitle: 'Zoom to initial extent'
+      });
+      this.zoomHome.addTo(this.mainMap);
+
   }
 
   /**
    * Called after the constructor, initializing input properties, and the first call to ngOnChanges.
    */
   ngOnInit(): void {
-    if (this.appService.isInitMap() === true) {
-      // Uncomment this line out to test dealing with remembering map state.
-      // this.appService.mapCreated();
-      // Set the pre-initialized mapConfig JSON object to mapConfig.
-      this.mapConfig = this.appService.getMapConfig();
+    // Set the pre-initialized mapConfig JSON object to mapConfig.
+    this.mapConfig = this.appService.getMapConfig();
 
-      this.forkJoinSubscription$ = this.appService.setMapData().subscribe((results: any) => {
-        // Results are as follows:
-        // results[0] - setDates: 
-        // results[1] - SNODAS_boundaries: The geoJSON file for the SNODAS boundaries (basins) in Colorado.
+    this.forkJoinSubscription$ = this.appService.setMapData().subscribe((results: any) => {
+      // Results are as follows:
+      // results[0] - setDates: The plain text file list of dates from assets/ or the state server URL.
+      // results[1] - SNODAS_boundaries: The geoJSON file for the SNODAS boundaries (basins) in Colorado.
 
-        this.appService.setDates(results[0]);
-        this.SNODAS_Geometry = results[1];
+      this.appService.setDates(results[0]);
+      this.SNODAS_Geometry = results[1];
 
-        // Initialize the Leaflet map.
+      // Set the initial current date from the ListOfDates.txt file.
+      this.appService.setCurrDate(this.appService.getDates()[0]);
+
+      if (this.appService.isInitMap() === true) {
+        this.appService.mapCreated();
+        this.appService.setLeafletConfig();
+
+        // Initialize the Leaflet map with the current date.
         this.initMap();
         // Build the map each update.
-        this.buildMap(this.appService.getDates()[0], 'none', false);
-      });
-    } else {
-      console.log('here');
-    }
+        this.buildMap(this.appService.getCurrDate(), 'none', false);
+      } else {
+        // Initialize the Leaflet map with the current date.
+        this.initMap();
+        // Build the map each update.
+        this.buildMap(this.appService.getCurrDate(), 'none', false);
+      }
+    });
     
   }
 
@@ -479,7 +476,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   /* This function is used for the CO_boundary style. It sets the weight of the line used
   to border Colorado, the color of that line, and sets the fill opacity to 0. */
-  public setStateBoundaryStyle(feature){
+  public setStateBoundaryStyle(feature: any): any {
     return {
       weight: 5,
       color: 'black',

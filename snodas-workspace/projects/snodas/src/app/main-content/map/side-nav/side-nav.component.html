@@ -1,16 +1,32 @@
 <div id="main">
 
-  <mat-form-field id="select-form" appearance="fill">
+  <mat-form-field id="select-form">
     <mat-label>Select Date</mat-label>
     <mat-select name="date-selection">
-      <input matInput
+      <cdk-virtual-scroll-viewport
+      [itemSize]="48"
+      [minBufferPx]="540"
+      [maxBufferPx]="540"
+      [style.height.px]="240">
+        <input matInput
+              id="search"
+              placeholder="Search dates..."
+              (keyup)="userInput($event, 'date')">
+        <mat-option *cdkVirtualFor="let date of selectedDates"
+                    (click)="callUpdateFile(date)"
+                    [value]="date"
+                    [style.height.px]="48">
+          {{date}}
+        </mat-option>
+      </cdk-virtual-scroll-viewport>
+      <!-- <input matInput
               id="search"
               placeholder="Search dates..."
               (keyup)="userInput($event, 'date')">
       <mat-option *ngFor="let date of selectedDates"
                     (click)="callUpdateFile(date)">
         {{date}}
-      </mat-option>
+      </mat-option> -->
     </mat-select>
   </mat-form-field>
 
@@ -119,7 +135,7 @@
         </mat-panel-title>
       </mat-expansion-panel-header>
 
-      <div id="date-picker">
+      <div id="animation-form-input" [formGroup]="dateRange">
         <mat-form-field id="date-picker-form" appearance="fill">
     
           <mat-label>Enter a date range</mat-label>
@@ -127,57 +143,58 @@
                                 [min]="minDate"
                                 [max]="maxDate"
                                 separator="to">
-            <input matStartDate class="range-input" placeholder="Start Date">
-            <input matEndDate class="range-input" placeholder="End Date">
+            <input matStartDate
+                    class="range-input"
+                    formControlName="startDate"
+                    placeholder="Start Date">
+            <input matEndDate 
+                    class="range-input"
+                    formControlName="endDate"
+                    placeholder="End Date">
           </mat-date-range-input>
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-date-range-picker #picker [startAt]="minDate"></mat-date-range-picker>
+
+          <mat-error *ngIf="dateRange.controls.startDate.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+          <mat-error *ngIf="dateRange.controls.endDate.hasError('matEndDateInvalid')">Invalid end date</mat-error>
     
         </mat-form-field>
-      </div>
-    
-      <div id="day-increment">
+
         <mat-form-field id="day-increment-form">
           <mat-label>Increment in days</mat-label>
-          <input matInput value="1">
+          <input matInput
+                  formControlName="dayIncrement">
         </mat-form-field>
       </div>
     
-      <!-- This might not be needed in the future. Instead of pressing Submit button, the given date range and day
-      increment field could just be used and overridden if updated. -->
-      <button mat-raised-button
-              id="select-date"
-              (click)="onAnimationSubmit()"
-              matTooltip="Submit dates & day increment for animation"
-              [matTooltipShowDelay]="750"
-              matTooltipPosition="below">
-        Submit
-      </button>
-    
+      <!-- [disabled]="animationSubmit | menuDisable" -->
       <mat-slider id="date-slider"
-                  color="primary"
-                  [disabled]="animationSubmit | menuDisable">
+                  color="primary">
       </mat-slider>
-    
+      
+      <!-- [disabled]="animationSubmit | menuDisable" -->
       <button mat-raised-button
               id="animation-button"
-              [disabled]="animationSubmit | menuDisable"
+              (click)="playAnimation()"
+              
               matTooltip="Start animation"
               [matTooltipShowDelay]="750"
               matTooltipPosition="above">
         <i class="fa fa-play" aria-hidden="true"></i>
       </button>
+      <!-- [disabled]="animationSubmit | menuDisable" -->
       <button mat-raised-button
               id="animation-button"
-              [disabled]="animationSubmit | menuDisable"
+              (click)="pauseAnimation()"
               matTooltip="Pause animation"
               [matTooltipShowDelay]="750"
               matTooltipPosition="above">
         <i class="fa fa-pause" aria-hidden="true"></i>
       </button>
+      <!-- [disabled]="animationSubmit | menuDisable" -->
       <button mat-raised-button
               id="animation-button"
-              [disabled]="animationSubmit | menuDisable"
+              (click)="restartAnimation()"
               matTooltip="Restart animation"
               [matTooltipShowDelay]="750"
               matTooltipPosition="above">

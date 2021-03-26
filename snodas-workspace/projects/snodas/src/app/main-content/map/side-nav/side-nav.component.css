@@ -31,13 +31,7 @@ button#single-line {
   height: 32px;
 }
 
-/* This date-picker div id was created to give guidance to the font size of the Angular Material's date-picker input field.
-The size of the input box is dependant on the font size, so decreasing the font size will decrease the large default box. */
-div#date-picker {
-  font-size: 13px;
-}
-
-div#day-increment {
+div#animation-form-input {
   font-size: 13px;
 }
 

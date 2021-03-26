@@ -29,6 +29,10 @@ export class AppService {
    */
   public chartBasinID: any;
   /**
+   * The text containing the markdown from the `data.md` file in assets.
+   */
+  public dataText: any;
+  /**
    * The list of dates.
    */
   public dates: any;
@@ -36,6 +40,10 @@ export class AppService {
    * The hard-coded string of the path to the default icon path that will be used for the website if none is given.
    */
   public readonly defaultFaviconPath = 'assets/img/coloradoDNR.ico';
+  /**
+   * Variable to notify the app whether in a development (local) or production (State server) environment.
+   */
+  public devEnv: boolean;
   /**
    * The text containing the markdown from the `documentation.md` file in assets.
    */
@@ -52,6 +60,14 @@ export class AppService {
    * Boolean representing whether the initial Leaflet map is being created, or if it has already been created.
    */
   public initMap = true;
+  /**
+   * The configuration object for tracking a Leaflet map's state between tabs.
+   */
+   public leafletConfig: {
+    lat?: string,
+    long?: string,
+    zoom?: number
+  };
   /**
    * The map configuration object, from `map-config.json`.
    */
@@ -70,8 +86,22 @@ export class AppService {
   constructor(private http: HttpClient) { }
 
 
+  /**
+   * Testing.
+   * @param map 
+   */
   public addMap(map: any): void {
     this.mapList.push(map);
+  }
+
+  /**
+   * 
+   */
+  public checkIfMapChanged(): boolean {
+    if (this.leafletConfig.lat !== this.mapConfig['lat']) {
+      return true;
+    }
+    return false;
   }
 
   /* function that returns the list of basins in the map */ 
@@ -154,6 +184,20 @@ export class AppService {
   }
 
   /**
+   * @returns Boolean whether the app is in a development (local) or production (global; state server) environment.
+   */
+  public getDevEnv(): boolean {
+    return this.devEnv;
+  }
+
+  /**
+   * @returns The Leaflet configuration object.
+   */
+  public getLeafletConfig(): any {
+    return this.leafletConfig;
+  }
+
+  /**
    * 
    * @returns 
    */
@@ -169,6 +213,13 @@ export class AppService {
   }
 
   /**
+   * @returns The text from the `data.md` markdown file.
+   */
+  public getDataText(): any {
+    return this.dataText;
+  }
+
+  /**
    * @returns The text from the `documentation.md` markdown file.
    */
   public getDocText(): any {
@@ -176,7 +227,6 @@ export class AppService {
   }
 
   /**
-   * 
    * @returns The mapConfig object.
    */
   public getMapConfig() {
@@ -214,10 +264,13 @@ export class AppService {
     const options: Object = {
       headers: new HttpHeaders({
         // 'Access-Control-Request-Method': 'GET'
-        'content-type': 'text/plain'
+        // 'Content-Type': 'text/plain',
+        // 'Accept': '*/*'
       }),
       responseType: 'text' as 'text'
     };
+    
+
     return this.http.get<any>(path, options)
     .pipe(
       catchError(this.handleError<any>(path))
@@ -254,20 +307,25 @@ export class AppService {
    */
    public async loadConfigFiles() {
     // Map Configuration
-    const mapData = await this.http.get('assets/map-config.json')
+    const mapTabData = await this.http.get('assets/map-config.json')
       .toPromise();
-    this.mapConfig = mapData;
+    this.mapConfig = mapTabData;
 
     // About Tab Text
     const obj: Object = { responseType: 'text' as 'text' };
-    const aboutData = await this.http.get('assets/docs/about.md', obj)
+    const aboutTabData = await this.http.get('assets/docs/about.md', obj)
       .toPromise();
-    this.aboutText = aboutData;
+    this.aboutText = aboutTabData;
+
+    // Data Tab Text
+    const dataTabData = await this.http.get('assets/docs/data.md', obj)
+      .toPromise();
+    this.dataText = dataTabData;
 
     // Documentation Tab Text
-    const docData = await this.http.get('assets/docs/documentation.md', obj)
+    const docTabData = await this.http.get('assets/docs/documentation.md', obj)
       .toPromise();
-    this.docText = docData;
+    this.docText = docTabData;
   }
 
   /**
@@ -286,8 +344,8 @@ export class AppService {
   }
 
   /**
-   * 
-   * @param currDate 
+   * Sets the selected date as the current date on the map.
+   * @param currDate The current selected date.
    */
   public setCurrDate(currDate: string): void {
     this.currDate = currDate;
@@ -298,7 +356,7 @@ export class AppService {
    * @param data The data retrieved from `setMapData()`. 
    * @returns The list of dates for the map.
    */
-   public setDates(data: any) {
+  public setDates(data: any) {
     var text: string[] = [];
     text = data.split('\n');
     /* Sort the dates in descending order (Most recent day first) */
@@ -311,7 +369,31 @@ export class AppService {
         text[date] = text[date].trim();
     }
     this.dates = text;
-}
+  }
+
+  /**
+   * Sets the @var devEnv depending on what is in the `map-config.json` file.
+   * @param env Variable to notify the app whether in a development (local) or production (global, state server) environment.
+   */
+  public setDevEnv(env: boolean): void {
+    this.devEnv = env;
+  }
+
+  /**
+   * Sets the initial value for the Leaflet config object.
+   */
+  public setLeafletConfig(): void {
+    this.leafletConfig = JSON.parse(JSON.stringify(this.getMapConfig()));
+  }
+
+  /**
+   * Sets the given key in the leafletConfig object to value, if the key exists.
+   */
+  public setLeafletConfigProp(key: string, value: any): void {
+    if (key in this.leafletConfig) {
+      this.leafletConfig[key] = value;
+    }
+  }
 
   /**
    * Function to be called that sets up every asynchronous call for data retrieval.
@@ -320,11 +402,13 @@ export class AppService {
     // Array to hold each Observable that needs to be subscribed to.
     var asyncData: Observable<any>[] = [];
 
-    asyncData.push(
-      // this.getPlainText('http://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/ListOfDates.txt'),
-      this.getPlainText('assets/SnowpackStatisticsByDate/ListOfDates.txt'),
-      this.getJSONData(this.mapConfig['SNODAS_boundaries'])
-    );
+    if (this.getDevEnv() === true) {
+      asyncData.push(this.getPlainText('assets/SnowpackStatisticsByDate/ListOfDates.txt'));
+    } else {
+      asyncData.push(this.getPlainText('http://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/ListOfDates.txt'))
+    }
+
+    asyncData.push(this.getJSONData(this.mapConfig['SNODAS_boundaries']));
     
     return forkJoin(asyncData);
   }

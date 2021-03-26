@@ -5,7 +5,10 @@ import { APP_INITIALIZER,
 import { HashLocationStrategy,
           LocationStrategy }       from '@angular/common';
 import { HttpClientModule }        from '@angular/common/http';
-import { FormsModule }             from '@angular/forms';
+import { FormsModule,
+          ReactiveFormsModule }    from '@angular/forms';
+
+import { ScrollingModule }         from '@angular/cdk/scrolling';    
 
 import { MatButtonModule }         from '@angular/material/button';
 import { MatDatepickerModule }     from '@angular/material/datepicker';
@@ -22,6 +25,7 @@ import { MatToolbarModule }        from '@angular/material/toolbar';
 import { MatTooltipModule }        from '@angular/material/tooltip';
 
 import { ShowdownModule }          from 'ngx-showdown';
+import * as Showdown               from 'showdown';
 
 import { AppRoutingModule }        from './app-routing.module';
 import { AppService }              from './app.service';
@@ -39,6 +43,8 @@ import { AppDateAdapter,
           APP_DATE_FORMATS }       from './main-content/map/side-nav/format-datepicker';
 
 
+
+
 /**
  * Retrieves the map configuration file JSON before the application loads, so pertinent information can be ready to use before
  * the app has finished initializing.
@@ -51,17 +57,41 @@ const appInit = (appService: AppService) => {
   };
 };
 
+const classMap = {
+  h1: 'showdown_h1',
+  h2: 'showdown_h2',
+  ul: 'ui list',
+  li: 'ui item',
+  table: 'showdown_table',
+  td: 'showdown_td',
+  th: 'showdown_th',
+  tr: 'showdown_tr',
+  p: 'showdown_p',
+  pre: 'showdown_pre'
+}
+
+const bindings = Object.keys(classMap)
+  .map(key => ({
+    type: 'output',
+    regex: new RegExp(`(<${key}>|<${key} (.*?)>)`, 'g'),
+    replace: `<${key} class="${classMap[key]}">`
+  }));
+
+const convert = new Showdown.Converter({
+  extensions: [bindings]
+});
+
 @NgModule({
   declarations: [
     AboutComponent,
     AppComponent,
+    DataComponent,
     DocComponent,
     HeaderComponent,
     NotFoundComponent,
     MapComponent,
-    SideNavComponent,
     MenuDisablePipe,
-    DataComponent,
+    SideNavComponent
   ],
   imports: [
     AppRoutingModule,
@@ -80,8 +110,16 @@ const appInit = (appService: AppService) => {
     MatSliderModule,
     MatToolbarModule,
     MatTooltipModule,
+    ReactiveFormsModule,
+    ScrollingModule,
     ShowdownModule.forRoot({
-      emoji: true, noHeaderId: true, flavor: 'github', tables: true, strikethrough: true, simpleLineBreaks: false
+      emoji: true,
+      extensions: [bindings],
+      flavor: 'github',
+      noHeaderId: true,
+      simpleLineBreaks: false,
+      strikethrough: true,
+      tables: true
     })
   ],
   providers: [

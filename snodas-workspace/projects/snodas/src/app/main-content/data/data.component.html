@@ -1,5 +1,7 @@
 <div id="content">
-  <h2>SNODAS Tools Data:</h2>
+
+  <showdown [value]="markdownHTML"></showdown>
+  <!--<h2>SNODAS Tools Data:</h2>
   <p>The national SNODAS data are available from the <a href="https://nsidc.org/data/g02158" target="_blank" rel="noopener noreferrer">Snow Data Assimilation System (SNODAS)</a> and can be viewed at <a href="https://www.nohrsc.noaa.gov/archived_data/" target="_blank" rel="noopener noreferrer">National Operational Hydrologic Remote Sensing Center (NOHRSC)</a>. The SNODAS data are processed into statistical data products by the CDSS SNODAS Tools.</p>
 
   <h4>Static Data Available for Download</h4>
@@ -38,8 +40,7 @@
   <p id="citation">SNODAS data citation:
   National Operational Hydrologic Remote Sensing Center. 2004. Snow Data Assimilation System (SNODAS) Data Products at NSIDC, Version 1.  SWE dataset.  Boulder, Colorado USA. NSIDC: National Snow and Ice Data Center. doi: http://dx.doi.org/10.7265/N5TB14TC.  Data are accessed daily, and historical period is also accessed as needed for historical period products.
   </p>
-</div>
-<!-- 
+
   <div class="dropdown">
       <span id="FileDate" style="font-size: 15px;">Current Date: </span>
       <button (click)="showDropdown('datesDropdown')" class="dropbtn" style="font-size: 15px;" title="Select a date">{{current_date}}</button>
@@ -96,5 +97,5 @@
       &nbsp;&nbsp;
       <button type="button" id="UpstreamBasinBtn" class="btn btn-outline-dark" title="{{UpstreamByBasin}}" disabled><a href={{UpstreamByBasin}}>Upstream Total By Basin CSV</a></button>
       <br><br>
-  </p>
-</div> -->
+  </p> -->
+</div>

@@ -1,9 +1,15 @@
 import { Component,
           EventEmitter,
           Input,
+          OnDestroy,
           OnInit, 
           Output}               from '@angular/core';
-
+import { FormGroup,
+          FormGroupDirective,
+          FormControl,
+          NgForm,
+          Validators }          from '@angular/forms';
+import { ErrorStateMatcher }    from '@angular/material/core';
 import { MatDialog,
           MatDialogConfig,
           MatDialogRef }        from '@angular/material/dialog';
@@ -11,8 +17,10 @@ import { MatDialog,
 import { DialogImageComponent } from '@openwaterfoundation/common/ui/dialog';
 import { WindowManager,
           WindowType }          from '@openwaterfoundation/common/ui/window-manager';
+
 import { Observable,
           Subscription }        from 'rxjs';
+
 import { AppService }           from '../../../app.service';
 
 @Component({
@@ -20,9 +28,9 @@ import { AppService }           from '../../../app.service';
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.css']
 })
-export class SideNavComponent implements OnInit {
+export class SideNavComponent implements OnInit, OnDestroy {
   /**
-   * 
+   * Array holding the original list of basins. For use with the basin search bar 
    */
   public allBasins: string[];
   /**
@@ -32,37 +40,60 @@ export class SideNavComponent implements OnInit {
   /**
    * Boolean describing whether the animation button has been clicked.
    */
-  public animationSubmit: boolean;
+  // public animationSubmit: boolean;
+  /**
+   * A FormGroup for the animation expansion panel. Consists of
+   * startDate    - The starting date selected or typed into the Mat Datepicker input field.
+   * endDate      - The ending date selected or typed into the Mat Datepicker input field.
+   * dayIncrement - The amount of days the animation will increment by.
+   */
+  public dateRange = new FormGroup({
+    startDate: new FormControl(Validators.required),
+    endDate: new FormControl(Validators.required),
+    dayIncrement: new FormControl(1, Validators.required)
+  });
+  /**
+   * The current date retrieved from the parent MapComponent to be displayed in a human-readable format.
+   */
+  @Input() currentDateDisplay: string;
+  /**
+   * 
+   */
+  public errorMatcher = new MyErrorStateMatcher();
+  /**
+   * Subscription to an event using data binding in the Map Component (parent) template file. Receives the
+   * Local_Id as an event when a basin is clicked on.
+   */
+  @Input() events: Observable<void>;
+  /**
+   * Variable representing the subscription to the Input() events above. Used to easily unsubscribe when
+   * this component is destroyed.
+   */
+  private eventsSubscription$: Subscription;
   /**
    * Boolean describing whether a basin has been clicked.
    */
   public isBasinSelected = false;
   /**
-   * The current date retrieved from the parent MapComponent to be displayed in a human-readable format.
+   * The earliest date a user can choose in the date picker.
    */
-  @Input() currentDateDisplay: string;
-
-  @Input() events: Observable<void>;
-
-  private eventsSubscription$: Subscription;
-  /**
-   * The minimum date a user can choose in the date picker.
-   */
+  // TODO: jpkeahey - 2021.3.25: Update to take the earliest date from the ListOfDates.txt file.
   public minDate = new Date(2017, 0);
   /**
-   * 
+   * The latest date a user can choose in the date picker.
    */
+  // TODO: jpkeahey - 2021.3.25: Update to take the latest date from the ListOfDates.txt file.
   public maxDate = new Date(2017, 3, 7);
   /**
    * The filtered array of basins returned after a user searches for a basin in the Select Basin Map Input.
    */
   public selectedBasins: string[];
   /**
-   * 
+   * The currently selected basin ID on the map.
    */
   public selectedBasinID: string;
   /**
-   * 
+   * The currently selected name of the basin on the map.
    */
   public selectedBasinName: string;
   /**
@@ -78,11 +109,11 @@ export class SideNavComponent implements OnInit {
    */
   @Input() SNODAS_Geometry: any;
   /**
-   * 
+   * EventEmitter that alerts the Map component (parent) that an update has happened, and sends the basin name.
    */
   @Output() updateBasinFunction = new EventEmitter<any>();
   /**
-   * 
+   * EventEmitter that alerts the Map component (parent) that an update has happened, and sends the date.
    */
   @Output() updateFileFunction = new EventEmitter<any>();
   /**
@@ -91,6 +122,11 @@ export class SideNavComponent implements OnInit {
   public windowManager: WindowManager = WindowManager.getInstance();
 
 
+  /**
+   * 
+   * @param appService 
+   * @param dialog 
+   */
   constructor(private appService: AppService,
               public dialog: MatDialog) {
 
@@ -100,7 +136,8 @@ export class SideNavComponent implements OnInit {
 
 
   /**
-   * 
+   * Called when a mat-option is clicked from the Basin Mat Form Field. It sends data back to the Map component
+   * with the basin name so the map and necessary Leaflet controls can be updated.
    * @param fullBasinName The basin name and id in a string, e.g. BASIN NAME (BasinID)
    */
   public callUpdateBasin(fullBasinName: string): void {
@@ -112,18 +149,55 @@ export class SideNavComponent implements OnInit {
   }
 
   /**
-   * 
-   * @param input 
+   * Called when mat-option is clicked from the Date Mat Form Field. It sends data back to the Map component
+   * with the date so the map and necessary Leaflet controls can be updated.
+   * @param date The date a user has selected.
    */
-   public callUpdateFile(input: string): void {
-    this.updateFileFunction.emit(input);
+   public callUpdateFile(date: string): void {
+    this.updateFileFunction.emit(date);
   }
 
   /**
-   * 
-   * @param graphType 
+   * Takes in a basin id and searches through SNODAS_Geometry object to find the local name of the basin.
+   * @param id The basin ID
+   * @returns The basin name as a string.
    */
-  public openImageDialog(graphType: string): void {
+  private getBasinName(id: any) {
+    for(let index in this.SNODAS_Geometry.features) {
+      if(this.SNODAS_Geometry.features[index]["properties"]["LOCAL_ID"] == id) {
+          return this.SNODAS_Geometry.features[index]["properties"]["LOCAL_NAME"];
+      }
+    }
+  }
+
+  /**
+   * Called after the constructor, initializing input properties, and the first call to ngOnChanges.
+   */
+  ngOnInit(): void {
+    // Format all dates so they are similar to ISO 8601 formatting with dashes.
+    this.allBasins = this.appService.formatBasins(this.SNODAS_Geometry);
+    // Create a deep copy of the original all basins array 
+    this.selectedBasins = this.allBasins.slice();
+
+    this.eventsSubscription$ = this.events.subscribe((basinID: any) => {
+      this.isBasinSelected = true;
+      this.selectedBasinID = basinID;
+      this.selectedBasinName = this.getBasinName(basinID);
+    });
+  }
+  
+  /**
+   * Called once, before the instance is destroyed.
+   */
+  ngOnDestroy(): void {
+    this.eventsSubscription$.unsubscribe();    
+  }
+
+  /**
+   * Constructs and opens a Material Dialog with a single, resizable image as the contents.
+   * @param graphType String representing what kind of graph to display, e.g. -SNODAS-SWE-Volume.png
+   */
+   public openImageDialog(graphType: string): void {
     var windowID = 'dialog-image' + this.selectedBasinID + graphType;
     if (this.windowManager.windowExists(windowID)) {
       return;
@@ -161,50 +235,28 @@ export class SideNavComponent implements OnInit {
     });
     this.windowManager.addWindow(windowID, WindowType.DOC);
   }
-
-  /**
-   * Takes in a basin id and searches through SNODAS_Geometry object to find the local name of the basin.
-   * @param id The basin ID
-   * @returns The basin name as a string.
-   */
-  private getBasinName(id: any) {
-    for(let index in this.SNODAS_Geometry.features) {
-      if(this.SNODAS_Geometry.features[index]["properties"]["LOCAL_ID"] == id) {
-          return this.SNODAS_Geometry.features[index]["properties"]["LOCAL_NAME"];
-      }
-    }
-  }
-
+  
   /**
    * 
    */
-  ngOnInit(): void {
-    // Format all dates so they are similar to ISO 8601 formatting with dashes.
-    this.allBasins = this.appService.formatBasins(this.SNODAS_Geometry);
-    // Create a deep copy of the original all basins array 
-    this.selectedBasins = this.allBasins.slice();
-
-    this.eventsSubscription$ = this.events.subscribe((basinID: any) => {
-      this.isBasinSelected = true;
-      this.selectedBasinID = basinID;
-      this.selectedBasinName = this.getBasinName(basinID);
-    })
+  public playAnimation(): void {
+    console.log(this.dateRange.value.startDate);
+    console.log(this.dateRange.value.endDate);
+    console.log(this.dateRange.value.dayIncrement);
   }
-
-  public onAnimationSubmit(): void {
-    this.animationSubmit = true;
-  }
-
+  
   /**
-   * Calls either the searchDates or searchBasins function depending which search bar is being used.
-   * @param event The KeyboardEvent object created every time a key is pressed by the user.
+   * 
    */
-  public userInput(event: any, inputType: string) {
-    if (inputType === 'date') {
-      this.selectedDates = this.searchDates(event.target.value, event.key);
-    } else if (inputType === 'basin') {
-      this.selectedBasins = this.searchBasins(event.target.value, event.key);
-    }
+  public pauseAnimation(): void {
+
+  }
+  
+  /**
+   * 
+   */
+  public restartAnimation(): void {
+
   }
 
   /**
@@ -259,4 +311,27 @@ export class SideNavComponent implements OnInit {
     
   }
 
+  /**
+   * Calls either the searchDates or searchBasins function depending which search bar is being used.
+   * @param event The KeyboardEvent object created every time a key is pressed by the user.
+   */
+   public userInput(event: any, inputType: string) {
+    if (inputType === 'date') {
+      this.selectedDates = this.searchDates(event.target.value, event.key);
+    } else if (inputType === 'basin') {
+      this.selectedBasins = this.searchBasins(event.target.value, event.key);
+    }
+  }
+
+}
+
+/**
+ * Error class for when invalid control is dirty, touched, or submitted. This overrides default error display settings
+ * and will show errors instantly.
+ */
+export class MyErrorStateMatcher implements ErrorStateMatcher {
+  public isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+    const isSubmitted = form && form.submitted;
+    return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
+  }
 }
