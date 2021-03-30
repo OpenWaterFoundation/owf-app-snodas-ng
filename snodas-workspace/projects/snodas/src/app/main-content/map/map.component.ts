@@ -88,12 +88,17 @@ export class MapComponent implements OnInit, OnDestroy {
       // Build the string to be displayed
       temp = SNODASFile.replace("assets/SnowpackStatisticsByDate/SnowpackStatisticsByDate_", "").replace(".csv", "");
     } else {
-      SNODASFile = 'http://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_' + currDate + '.csv';
-      temp = SNODASFile.replace("http://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_", "")
+      SNODASFile = 'https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_' + currDate + '.csv';
+      temp = SNODASFile.replace("https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_", "")
       .replace(".csv", "");
     }
-    // Create the more human-readable date format to be displayed.
-    this.currentDateDisplay = temp.substr(0,4) + "-" + temp.substr(4,2) + "-" + temp.substr(6,2);
+    // Create the more human-readable date format to be displayed. This is what's being used in the side-nav component to be
+    // displayed under Current SNODAS Date, and needed to be slowed down so it can sync up with the async map update, and the
+    // animation slider.
+    setTimeout(() => {
+      this.currentDateDisplay = temp.substr(0,4) + "-" + temp.substr(4,2) + "-" + temp.substr(6,2);
+    }, 200);
+
     // Use Papaparse to read the CSV file
     Papa.parse(SNODASFile, {
       delimiter: ",",
@@ -494,14 +499,14 @@ export class MapComponent implements OnInit, OnDestroy {
   // }
 
   /* Changes which basin is currently highlighted on the map */
-  public updateBasin(basin: any) {
+  public updateBasin(basin: string) {
     this.buildMap(this.appService.getCurrDate(), basin, true);
   }
 
   /* Called to update the date of the data the map is displaying */
-  public updateFile(file: any) {
-    file = file.substr(0,4) + file.substr(5,2) + file.substr(8,2);
-    this.buildMap(file, 'none', true);
+  public updateMapDate(date: string) {
+    date = date.substr(0,4) + date.substr(5,2) + date.substr(8,2);
+    this.buildMap(date, 'none', true);
   }
 
 }

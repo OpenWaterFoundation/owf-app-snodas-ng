@@ -57,9 +57,17 @@ export class AppService {
    */
   public faviconPath: string;
   /**
+   * The earliest date that can be chosen in the Material datepicker, or manually entered in the date input field.
+   */
+  public firstLegalDate: Date;
+  /**
    * Boolean representing whether the initial Leaflet map is being created, or if it has already been created.
    */
   public initMap = true;
+  /**
+   * The latest date that can be chosen in the Material datepicker, or manually entered in the date input field.
+   */
+  public lastLegalDate: Date;
   /**
    * The configuration object for tracking a Leaflet map's state between tabs.
    */
@@ -225,6 +233,18 @@ export class AppService {
   public getDocText(): any {
     return this.docText;
   }
+  /**
+   * @returns The first (earliest) eligible date to choose from the `ListOfDates.txt` file.
+   */
+  public getFirstLegalDate(): Date {
+    return this.firstLegalDate;
+  }
+  /**
+   * @returns The last (most recent) eligible date to choose from the `ListOfDates.txt` file.
+   */
+  public getLastLegalDate(): Date {
+    return this.lastLegalDate;
+  }
 
   /**
    * @returns The mapConfig object.
@@ -310,6 +330,8 @@ export class AppService {
     const mapTabData = await this.http.get('assets/map-config.json')
       .toPromise();
     this.mapConfig = mapTabData;
+    // Set the development environment for the app.
+    this.setDevEnv(this.mapConfig['devEnv']);
 
     // About Tab Text
     const obj: Object = { responseType: 'text' as 'text' };
@@ -352,7 +374,8 @@ export class AppService {
   }
 
   /**
-   * Splits and sorts each date from the `ListOfDates.txt` file. 
+   * Splits and sorts each date from the `ListOfDates.txt` file, and sets the first and last date for the min and max dates
+   * to choose in the Material datepicker.
    * @param data The data retrieved from `setMapData()`. 
    * @returns The list of dates for the map.
    */
@@ -369,6 +392,10 @@ export class AppService {
         text[date] = text[date].trim();
     }
     this.dates = text;
+
+    // Set both the first and last eligible dates to be chosen from in the datepicker.
+    this.lastLegalDate = this.setAsDate(text[0]);
+    this.firstLegalDate = this.setAsDate(text[text.length - 2]);
   }
 
   /**
@@ -380,32 +407,34 @@ export class AppService {
   }
 
   /**
-   * Sets the initial value for the Leaflet config object.
+   * @returns A new Date object created from a line in the `ListOfDates.txt` file.
    */
+  private setAsDate(date: string): Date {
+    // Date creation requires the month to be a zero-based index number, hence the minus 1.
+    return new Date(parseInt(date.substr(0,4)), parseInt(date.substr(4,2)) - 1, parseInt(date.substr(6,2)));
+  }
+
+  /** Sets the initial value for the Leaflet config object. */
   public setLeafletConfig(): void {
     this.leafletConfig = JSON.parse(JSON.stringify(this.getMapConfig()));
   }
 
-  /**
-   * Sets the given key in the leafletConfig object to value, if the key exists.
-   */
+  /** Sets the given key in the leafletConfig object to value, if the key exists. */
   public setLeafletConfigProp(key: string, value: any): void {
     if (key in this.leafletConfig) {
       this.leafletConfig[key] = value;
     }
   }
 
-  /**
-   * Function to be called that sets up every asynchronous call for data retrieval.
-   */
+  /** Sets up every asynchronous call for static data retrieval to be put in a forkJoin. */
   public setMapData(): any {
     // Array to hold each Observable that needs to be subscribed to.
     var asyncData: Observable<any>[] = [];
-
+    console.log('Development Environment:', this.getDevEnv());
     if (this.getDevEnv() === true) {
       asyncData.push(this.getPlainText('assets/SnowpackStatisticsByDate/ListOfDates.txt'));
     } else {
-      asyncData.push(this.getPlainText('http://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/ListOfDates.txt'))
+      asyncData.push(this.getPlainText('https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/ListOfDates.txt'))
     }
 
     asyncData.push(this.getJSONData(this.mapConfig['SNODAS_boundaries']));
