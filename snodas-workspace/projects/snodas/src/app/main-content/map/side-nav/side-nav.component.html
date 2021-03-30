@@ -2,7 +2,8 @@
 
   <mat-form-field id="select-form">
     <mat-label>Select Date</mat-label>
-    <mat-select name="date-selection">
+    <mat-select name="date-selection"
+                (openedChange)="openSelectChange($event)">
       <cdk-virtual-scroll-viewport
       [itemSize]="48"
       [minBufferPx]="540"
@@ -13,20 +14,12 @@
               placeholder="Search dates..."
               (keyup)="userInput($event, 'date')">
         <mat-option *cdkVirtualFor="let date of selectedDates"
-                    (click)="callUpdateFile(date)"
+                    (click)="callUpdateMapDate(date)"
                     [value]="date"
                     [style.height.px]="48">
           {{date}}
         </mat-option>
       </cdk-virtual-scroll-viewport>
-      <!-- <input matInput
-              id="search"
-              placeholder="Search dates..."
-              (keyup)="userInput($event, 'date')">
-      <mat-option *ngFor="let date of selectedDates"
-                    (click)="callUpdateFile(date)">
-        {{date}}
-      </mat-option> -->
     </mat-select>
   </mat-form-field>
 
@@ -163,26 +156,28 @@
         <mat-form-field id="day-increment-form">
           <mat-label>Increment in days</mat-label>
           <input matInput
+                  [errorStateMatcher]="errorMatcher"
                   formControlName="dayIncrement">
+          <mat-error *ngIf="dateRange.controls.dayIncrement.hasError('pattern')"></mat-error>
         </mat-form-field>
       </div>
     
-      <!-- [disabled]="animationSubmit | menuDisable" -->
+      <!-- thumbLabel [displayWith]="formatLabel" -->
       <mat-slider id="date-slider"
+                  [value]="sliderValue"
+                  disabled="true"
                   color="primary">
       </mat-slider>
       
-      <!-- [disabled]="animationSubmit | menuDisable" -->
       <button mat-raised-button
               id="animation-button"
               (click)="playAnimation()"
-              
+              [disabled]="animationPlaying | menuDisable : 'play'"
               matTooltip="Start animation"
               [matTooltipShowDelay]="750"
               matTooltipPosition="above">
         <i class="fa fa-play" aria-hidden="true"></i>
       </button>
-      <!-- [disabled]="animationSubmit | menuDisable" -->
       <button mat-raised-button
               id="animation-button"
               (click)="pauseAnimation()"
@@ -191,10 +186,10 @@
               matTooltipPosition="above">
         <i class="fa fa-pause" aria-hidden="true"></i>
       </button>
-      <!-- [disabled]="animationSubmit | menuDisable" -->
       <button mat-raised-button
               id="animation-button"
               (click)="restartAnimation()"
+              [disabled]="animationPaused | menuDisable : 'restart' : animationCompleted"
               matTooltip="Restart animation"
               [matTooltipShowDelay]="750"
               matTooltipPosition="above">

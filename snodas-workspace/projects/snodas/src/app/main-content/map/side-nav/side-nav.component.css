@@ -151,7 +151,8 @@ input.range-input::placeholder {
 }
 
 #date-slider {
-  margin: 0px;
+  /* margin: 10px 0px 10px 0px; For when using the thumbLabel*/
+  margin-bottom: 5px;
   width: 90%;
 }
 

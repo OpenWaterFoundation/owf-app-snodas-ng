@@ -3,25 +3,27 @@ import { Component,
           Input,
           OnDestroy,
           OnInit, 
-          Output}               from '@angular/core';
+          Output,
+          ViewChild }               from '@angular/core';
 import { FormGroup,
           FormGroupDirective,
           FormControl,
           NgForm,
-          Validators }          from '@angular/forms';
-import { ErrorStateMatcher }    from '@angular/material/core';
+          Validators }              from '@angular/forms';
+import { ErrorStateMatcher }        from '@angular/material/core';
 import { MatDialog,
           MatDialogConfig,
-          MatDialogRef }        from '@angular/material/dialog';
+          MatDialogRef }            from '@angular/material/dialog';
+import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 
-import { DialogImageComponent } from '@openwaterfoundation/common/ui/dialog';
+import { DialogImageComponent }     from '@openwaterfoundation/common/ui/dialog';
 import { WindowManager,
-          WindowType }          from '@openwaterfoundation/common/ui/window-manager';
+          WindowType }              from '@openwaterfoundation/common/ui/window-manager';
 
 import { Observable,
-          Subscription }        from 'rxjs';
+          Subscription }            from 'rxjs';
 
-import { AppService }           from '../../../app.service';
+import { AppService }               from '../../../app.service';
 
 @Component({
   selector: 'app-side-nav',
@@ -29,18 +31,38 @@ import { AppService }           from '../../../app.service';
   styleUrls: ['./side-nav.component.css']
 })
 export class SideNavComponent implements OnInit, OnDestroy {
-  /**
-   * Array holding the original list of basins. For use with the basin search bar 
-   */
+  /** Array holding the original list of basins. For use with the basin search bar */
   public allBasins: string[];
-  /**
-   * The array of dates from the ListOfDates.txt file.
-   */
+  /** The array of dates from the ListOfDates.txt file. */
   public allDates: string[];
   /**
-   * Boolean describing whether the animation button has been clicked.
+   * 
    */
-  // public animationSubmit: boolean;
+  public animationCompleted = false;
+
+  public animationEndDate: string;
+
+  public animationEndIndex: number;
+
+  public animationIndex: number;
+
+  public animationInterval: any;
+
+  public animationPaused: boolean;
+
+  public animationPlaying = false;
+
+  public animationSliderInc: number;
+
+  public animationStartDate: string;
+
+  /** The amount of days the animation will increment by. */
+  public animationStep: number;
+  /**
+   * The reference to the virtual scroll viewport in the template file by using the @ViewChild decorator. The change detector
+   * looks for the first element or directive matching the selector in the view DOM, and if it changes, the property is updated.
+   */
+  @ViewChild(CdkVirtualScrollViewport, { static: false }) cdkVirtualScrollViewPort: CdkVirtualScrollViewport;
   /**
    * A FormGroup for the animation expansion panel. Consists of
    * startDate    - The starting date selected or typed into the Mat Datepicker input field.
@@ -50,11 +72,9 @@ export class SideNavComponent implements OnInit, OnDestroy {
   public dateRange = new FormGroup({
     startDate: new FormControl(Validators.required),
     endDate: new FormControl(Validators.required),
-    dayIncrement: new FormControl(1, Validators.required)
+    dayIncrement: new FormControl(1, [Validators.required, Validators.pattern('[0-9]+')])
   });
-  /**
-   * The current date retrieved from the parent MapComponent to be displayed in a human-readable format.
-   */
+  /** The current date retrieved from the parent MapComponent to be displayed in a human-readable format. */
   @Input() currentDateDisplay: string;
   /**
    * 
@@ -70,52 +90,30 @@ export class SideNavComponent implements OnInit, OnDestroy {
    * this component is destroyed.
    */
   private eventsSubscription$: Subscription;
-  /**
-   * Boolean describing whether a basin has been clicked.
-   */
+  /** Boolean describing whether a basin has been clicked. */
   public isBasinSelected = false;
-  /**
-   * The earliest date a user can choose in the date picker.
-   */
-  // TODO: jpkeahey - 2021.3.25: Update to take the earliest date from the ListOfDates.txt file.
-  public minDate = new Date(2017, 0);
-  /**
-   * The latest date a user can choose in the date picker.
-   */
-  // TODO: jpkeahey - 2021.3.25: Update to take the latest date from the ListOfDates.txt file.
-  public maxDate = new Date(2017, 3, 7);
-  /**
-   * The filtered array of basins returned after a user searches for a basin in the Select Basin Map Input.
-   */
+  /** The earliest date a user can choose in the date picker. */
+  public minDate: Date;
+  /** The latest date a user can choose in the date picker. */
+  public maxDate: Date;
+  /** The filtered array of basins returned after a user searches for a basin in the Select Basin Map Input. */
   public selectedBasins: string[];
-  /**
-   * The currently selected basin ID on the map.
-   */
+  /** The currently selected basin ID on the map. */
   public selectedBasinID: string;
-  /**
-   * The currently selected name of the basin on the map.
-   */
+  /** The currently selected name of the basin on the map. */
   public selectedBasinName: string;
-  /**
-   * The date selected from the Select Date Form Field dropdown menu.
-   */
+  /** The date selected from the Select Date Form Field dropdown menu. */
   public selectedDate: string;
-  /**
-   * The filtered array of dates returned after a user searches for a date in the Select Date Mat Input.
-   */
+  /** The filtered array of dates returned after a user searches for a date in the Select Date Mat Input. */
   public selectedDates: string[];
-  /**
-   * The feature object retrieved from the basin boundaries geoJSON file.
-   */
+
+  public sliderValue = 0;
+  /** The feature object retrieved from the basin boundaries geoJSON file. */
   @Input() SNODAS_Geometry: any;
-  /**
-   * EventEmitter that alerts the Map component (parent) that an update has happened, and sends the basin name.
-   */
+  /** EventEmitter that alerts the Map component (parent) that an update has happened, and sends the basin name. */
   @Output() updateBasinFunction = new EventEmitter<any>();
-  /**
-   * EventEmitter that alerts the Map component (parent) that an update has happened, and sends the date.
-   */
-  @Output() updateFileFunction = new EventEmitter<any>();
+  /** EventEmitter that alerts the Map component (parent) that an update has happened, and sends the date. */
+  @Output() updateMapDateFunction = new EventEmitter<any>();
   /**
    * The windowManager instance, whose job it will be to create, maintain, and remove multiple open dialogs from the InfoMapper.
    */
@@ -129,9 +127,12 @@ export class SideNavComponent implements OnInit, OnDestroy {
    */
   constructor(private appService: AppService,
               public dialog: MatDialog) {
-
+    // Set all dates from the list of dates set in the App Service, then set the input/search-used selectedDates array.
     this.allDates = this.appService.getDatesDashes();
     this.selectedDates = this.allDates;
+    // Retrieve and set the min and max dates for the animation.
+    this.minDate = this.appService.getFirstLegalDate();
+    this.maxDate = this.appService.getLastLegalDate();
   }
 
 
@@ -153,8 +154,27 @@ export class SideNavComponent implements OnInit, OnDestroy {
    * with the date so the map and necessary Leaflet controls can be updated.
    * @param date The date a user has selected.
    */
-   public callUpdateFile(date: string): void {
-    this.updateFileFunction.emit(date);
+   public callUpdateMapDate(date: string): void {
+    this.updateMapDateFunction.emit(date);
+  }
+
+  /**
+   * Converts a Date object from the Material datepicker into the `YYYY-MM-DD` format to correctly find it in the array created
+   * from the `ListOfDates.txt` file.
+   * @param date The Date object to convert to a string that matches the date format in the `ListOfDates.txt` file.
+   * @returns A string in the format `YYYY-MM-DD`.
+   */
+  private convertDateToString(date: Date): string {
+    return date.getFullYear() + '-' + this.zeroPad((date.getMonth() + 1), 2) + '-' + this.zeroPad(date.getDate(), 2);
+  }
+
+  /**
+   * 
+   * @param value 
+   * @returns 
+   */
+  public formatLabel(value: any): any {
+    return value;
   }
 
   /**
@@ -208,7 +228,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
         graphType === 'UpstreamTotal-SNODAS-SWE-Volume.png' ||
         isNaN(parseInt(this.selectedBasinID))) {
 
-      fullImagePath = 'http://snodas.cdss.state.co.us/app/SnowpackGraphsByBasin/' + this.selectedBasinID + graphType;
+      fullImagePath = 'https://snodas.cdss.state.co.us/app/SnowpackGraphsByBasin/' + this.selectedBasinID + graphType;
     } else {
       fullImagePath = 'assets/SnowpackGraphsByBasin/' + this.selectedBasinID + graphType;
     }
@@ -235,28 +255,105 @@ export class SideNavComponent implements OnInit, OnDestroy {
     });
     this.windowManager.addWindow(windowID, WindowType.DOC);
   }
-  
+
   /**
-   * 
+   * Whenever the mat-select field is clicked, check if the event exists and use the @ViewChild decorated class variable to check
+   * the size of the viewport and scroll to the first element; this way, the viewport will always start there.
    */
-  public playAnimation(): void {
-    console.log(this.dateRange.value.startDate);
-    console.log(this.dateRange.value.endDate);
-    console.log(this.dateRange.value.dayIncrement);
+  public openSelectChange($event: any): void {
+    if ($event) {
+      this.cdkVirtualScrollViewPort.scrollToIndex(0);
+      this.cdkVirtualScrollViewPort.checkViewportSize();
+    } else {}
   }
   
   /**
-   * 
+   * Obtains the data entered from the mat-form-field under the animation and sets up and runs the animation on the map.
+   */
+  public playAnimation(): void {
+    // Check to see if all the form fields are entered correctly, and if not, don't do anything.
+    if (this.dateRange.value.startDate instanceof Function || this.dateRange.value.endDate instanceof Function ||
+        !Number.isInteger(Number(this.dateRange.value.dayIncrement))) {
+      return;
+    }
+    // Check if the dates given are within the animation boundaries, and if not, don't do anything.
+    if (this.dateRange.value.startDate < this.minDate || this.dateRange.value.endDate > this.maxDate) {
+      return;
+    }
+
+    // Use the side-nav instance to assign to _this so it can be used in the setInterval function.
+    var _this = this;
+
+    this.animationCompleted = false;
+
+    if (this.animationPaused === undefined || this.animationPaused === false) {
+      // Reset the slider's value to 0.
+      this.sliderValue = 0;
+
+      this.animationStartDate = this.convertDateToString(this.dateRange.value.startDate);
+      this.animationIndex = this.allDates.indexOf(this.animationStartDate);
+
+      this.animationEndDate = this.convertDateToString(this.dateRange.value.endDate)
+      this.animationEndIndex = this.allDates.indexOf(this.animationEndDate);
+
+      // The total amount of milliseconds between days. This is built into Date objects.
+      var diffTime = this.dateRange.value.endDate - this.dateRange.value.startDate;
+      // The total amount of days the date range encapsulates by multiplying by milliseconds, seconds, minutes & days.
+      var totalDays = Math.ceil(diffTime) / (1000 * 60 * 60 * 24) + 1;
+      // The number of times the slider will step across the entire width by diving the total days by the day increment.
+      var sliderStep = Math.ceil(totalDays / Number(this.dateRange.value.dayIncrement));
+      // The number - or percent - to increase the slider by. The slider value can be a percent, which helps keep the movement
+      // integrity on longer ranges. 
+      this.animationSliderInc = 100 / sliderStep;
+    } else {
+      this.animationPaused = false;
+    }
+    
+
+    // Call the map date function in the parent Map Component to update the map date and basins with each date
+    // in the range of the animation. This will keep executing every X milliseconds until a conditional is met.
+    this.animationInterval = setInterval(function() {
+      // If the current animation index is less than the ending index, then end the interval.
+      if (_this.animationIndex < _this.animationEndIndex) {
+        _this.animationPlaying = false;
+        _this.animationCompleted = true;
+        clearInterval(_this.animationInterval);
+        // Clearing the interval is not enough. It will keep executing the remaining code in this setInterval function, so
+        // return from the function to stop that from happening.
+        return;
+      }
+
+      _this.animationPlaying = true;
+      // Update the mat slider value here. It's put in a timeout (har har) so that it and the map updates at the same time.
+      // It actually needs to be slowed down so that it doesn't update faster than the map (which has to perform a GET request
+      // every time new basins are shown). 200 seems to work okay for now.
+      setTimeout(() => { 
+        _this.sliderValue += _this.animationSliderInc;
+      }, 200);
+      
+      // Update the map here.
+      _this.updateMapDateFunction.emit(_this.allDates[_this.animationIndex]);
+      // Move the animation index down by the incremented field.
+      _this.animationIndex -= Number(_this.dateRange.value.dayIncrement);
+    }, 1000);
+  }
+  
+  /**
+   * Pauses the animation by clearing the setInterval function that was started in the playAnimation function on a Play
+   * button click.
    */
   public pauseAnimation(): void {
-
+    clearInterval(this.animationInterval);
+    this.animationPlaying = false;
+    this.animationPaused = true;
   }
   
   /**
    * 
    */
   public restartAnimation(): void {
-
+    this.animationPaused = false;
+    this.playAnimation();
   }
 
   /**
@@ -323,6 +420,15 @@ export class SideNavComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Helper function that left pads a number by a given amount of places, e.g. num = 1, places = 2, returns 01
+   * @param num The number that needs padding
+   * @param places The amount the padding will go out to the left
+   */
+   private zeroPad(num: number, places: number) {    
+    return String(num).padStart(places, '0');
+  }
+
 }
 
 /**
@@ -331,6 +437,15 @@ export class SideNavComponent implements OnInit, OnDestroy {
  */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
   public isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+    // console.log(control.value);
+    // console.log(form.control);
+    // console.log(form.value);
+    // console.log(form.status);
+    // How would I check if a date is out of bounds using minDate and maxDate from the Component?
+    // if (form.value.startDate && form.value.startDate instanceof Date) {
+    //   return 
+    // }
+
     const isSubmitted = form && form.submitted;
     return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
   }
