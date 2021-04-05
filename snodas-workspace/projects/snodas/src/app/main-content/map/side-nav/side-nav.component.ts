@@ -35,27 +35,27 @@ export class SideNavComponent implements OnInit, OnDestroy {
   public allBasins: string[];
   /** The array of dates from the ListOfDates.txt file. */
   public allDates: string[];
-  /**
-   * 
-   */
+  /** Whether the animation has completed, and has not been restarted yet. */
   public animationCompleted = false;
-
+  /** The last date to be shown in the animation. */
   public animationEndDate: string;
-
+  /**
+   * The last index to be used for the end date. Since dates are ordered from most recent to earliest dates, this index will
+   * be smaller than the animationIndex.
+   */
   public animationEndIndex: number;
-
+  /** The starting index to represent where in the animation subset array  */
   public animationIndex: number;
-
+  /** The ID value of the animation setInterval. Used as a reference to stop the timer. */
   public animationInterval: any;
-
+  /** Whether the animation is currently paused. */
   public animationPaused: boolean;
-
+  /** Whether the animation is currently playing. */
   public animationPlaying = false;
-
+  /** The value as a percent to increment the slider by starting at 0 and ending close to 100. */
   public animationSliderInc: number;
-
+  /** The first date to be shown in the animation. */
   public animationStartDate: string;
-
   /** The amount of days the animation will increment by. */
   public animationStep: number;
   /**
@@ -76,9 +76,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
   });
   /** The current date retrieved from the parent MapComponent to be displayed in a human-readable format. */
   @Input() currentDateDisplay: string;
-  /**
-   * 
-   */
+  /**  */
   public errorMatcher = new MyErrorStateMatcher();
   /**
    * Subscription to an event using data binding in the Map Component (parent) template file. Receives the
@@ -106,7 +104,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
   public selectedDate: string;
   /** The filtered array of dates returned after a user searches for a date in the Select Date Mat Input. */
   public selectedDates: string[];
-
+  /** The initial value of the animation slider. */
   public sliderValue = 0;
   /** The feature object retrieved from the basin boundaries geoJSON file. */
   @Input() SNODAS_Geometry: any;
