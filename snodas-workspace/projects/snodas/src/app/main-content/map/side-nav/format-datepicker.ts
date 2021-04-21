@@ -4,9 +4,10 @@ import { MatDateFormats }    from '@angular/material/core';
 
 
 /**
- * This class formats the output off the Material Date Ranges, so instead of displaying the common MM/DD/YYYY to a user,
- * the ISO 8601 format YYYY-MM-DD will be used instead. This is set in the providers array in the top level app module.
- * Adding this directly to the Component using the data picker would also work, under the `@Component` decorator.
+ * A custom date adapter that formats the output of the Material Date Ranges, so instead of displaying the common
+ * MM/DD/YYYY to a user, the ISO 8601 format YYYY-MM-DD will be used instead. This is set in the providers array in the top
+ * level app module. Adding this directly to the Component using the data picker would also work, under the `@Component`
+ * decorator.
  */
 @Injectable()
 export class AppDateAdapter extends NativeDateAdapter {

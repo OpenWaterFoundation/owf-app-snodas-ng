@@ -25,6 +25,7 @@ import { Observable,
 
 import { AppService }               from '../../../app.service';
 
+
 @Component({
   selector: 'app-side-nav',
   templateUrl: './side-nav.component.html',
@@ -94,6 +95,8 @@ export class SideNavComponent implements OnInit, OnDestroy {
   public minDate: Date;
   /** The latest date a user can choose in the date picker. */
   public maxDate: Date;
+
+  public restartClicked: boolean;
   /** The filtered array of basins returned after a user searches for a basin in the Select Basin Map Input. */
   public selectedBasins: string[];
   /** The currently selected basin ID on the map. */
@@ -135,6 +138,18 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
 
   /**
+   * Adds N days to the given date to be given and shown on the Mat Datepicker input field.
+   * @param date The date to add days to.
+   * @param days The number of days to add to the @var date.
+   * @returns The new date, incremented N days from the original date.
+   */
+  private addDays(date: Date, days: number): Date {
+    let result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+
+  /**
    * Called when a mat-option is clicked from the Basin Mat Form Field. It sends data back to the Map component
    * with the basin name so the map and necessary Leaflet controls can be updated.
    * @param fullBasinName The basin name and id in a string, e.g. BASIN NAME (BasinID)
@@ -164,6 +179,17 @@ export class SideNavComponent implements OnInit, OnDestroy {
    */
   private convertDateToString(date: Date): string {
     return date.getFullYear() + '-' + this.zeroPad((date.getMonth() + 1), 2) + '-' + this.zeroPad(date.getDate(), 2);
+  }
+
+  public dateEndChange(rangeEndDate: any): any {
+    console.log();
+    console.log(rangeEndDate.value);
+  }
+
+  public dateStartChange(rangeStartDate: any): any {
+    console.log(rangeStartDate.value);
+    rangeStartDate.value = this.addDays(rangeStartDate.value, 1);
+    console.log(rangeStartDate.value);
   }
 
   /**
@@ -266,7 +292,8 @@ export class SideNavComponent implements OnInit, OnDestroy {
   }
   
   /**
-   * Obtains the data entered from the mat-form-field under the animation and sets up and runs the animation on the map.
+   * Obtains the data entered from the mat-form-field under the animation and sets up and runs the animation on the map
+   * in set intervals.
    */
   public playAnimation(): void {
     // Check to see if all the form fields are entered correctly, and if not, don't do anything.
@@ -287,6 +314,11 @@ export class SideNavComponent implements OnInit, OnDestroy {
     if (this.animationPaused === undefined || this.animationPaused === false) {
       // Reset the slider's value to 0.
       this.sliderValue = 0;
+
+      if (this.restartClicked === true) {
+        this.restartClicked = false;
+        return;
+      }
 
       this.animationStartDate = this.convertDateToString(this.dateRange.value.startDate);
       this.animationIndex = this.allDates.indexOf(this.animationStartDate);
@@ -309,7 +341,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
     
 
     // Call the map date function in the parent Map Component to update the map date and basins with each date
-    // in the range of the animation. This will keep executing every X milliseconds until a conditional is met.
+    // in the range of the animation. This will keep executing every N milliseconds until a conditional is met.
     this.animationInterval = setInterval(function() {
       // If the current animation index is less than the ending index, then end the interval.
       if (_this.animationIndex < _this.animationEndIndex) {
@@ -351,6 +383,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
    */
   public restartAnimation(): void {
     this.animationPaused = false;
+    this.restartClicked = true;
     this.playAnimation();
   }
 
