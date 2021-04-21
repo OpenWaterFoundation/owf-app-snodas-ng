@@ -20,6 +20,7 @@ declare var L: any;
   styleUrls: ['./map.component.css']
 })
 export class MapComponent implements OnInit, OnDestroy {
+
   /** The background layer of the map. */
   public background: any;
   /** The Leaflet layer containing the Colorado boundary. */
@@ -34,8 +35,6 @@ export class MapComponent implements OnInit, OnDestroy {
   public mainMap: any;
   /** The map configuration object obtained from map-config.json. */
   public mapConfig: any;
-  /** Unknown. */
-  public mobileQuery: MediaQueryList;
   /** GeoJSON layer containing the merged SNODAS basin boundary geoJSON file and CSV file data of the basin by date. */
   public basinBoundaryWithData: any;
   /** Info panel on bottom left of the map. */
@@ -114,8 +113,10 @@ export class MapComponent implements OnInit, OnDestroy {
           this.mainMap.removeLayer(this.basinBoundaryWithData);
         }
         // Merge the basin boundary data with the statistics of each basin, then add that object to the map.
-        this.basinBoundaryWithData = L.geoJson(MergeData(this.SNODAS_Geometry,result),
-        {style: setSWELayerStyle, onEachFeature: onEachFeature}).addTo(this.mainMap);
+        this.basinBoundaryWithData = L.geoJson(MergeData(this.SNODAS_Geometry, result), {
+          style: setSWELayerStyle,
+          onEachFeature: onEachFeature
+        }).addTo(this.mainMap);
 
         // SelectBasinCall is set to true when the ClickOnMapItem function is called.
         var selectBasinCall = false;

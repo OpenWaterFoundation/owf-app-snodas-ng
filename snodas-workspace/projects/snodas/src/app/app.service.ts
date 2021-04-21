@@ -12,61 +12,35 @@ import { forkJoin,
   providedIn: 'root'
 })
 export class AppService {
-  /**
-   * The text containing the markdown from the `about.md` file in assets.
-   */
+  /** The text containing the markdown from the `about.md` file in assets. */
   public aboutText: any;
-  /**
-   * The current date displayed on the map.
-   */
+  /** The current date displayed on the map. */
   public currDate: string;
   /**
    * The list of basins.
    */
   // basins: string[] = this.getBasins();
-  /**
-   * The chart basin ID.
-   */
+  /**  The chart basin ID. */
   public chartBasinID: any;
-  /**
-   * The text containing the markdown from the `data.md` file in assets.
-   */
+  /** The text containing the markdown from the `data.md` file in assets. */
   public dataText: any;
-  /**
-   * The list of dates.
-   */
+  /** The list of dates. */
   public dates: any;
-  /**
-   * The hard-coded string of the path to the default icon path that will be used for the website if none is given.
-   */
+  /** The hard-coded string of the path to the default icon path that will be used for the website if none is given. */
   public readonly defaultFaviconPath = 'assets/img/coloradoDNR.ico';
-  /**
-   * Variable to notify the app whether in a development (local) or production (State server) environment.
-   */
+  /** Variable to notify the app whether in a development (local) or production (State server) environment. */
   public devEnv: boolean;
-  /**
-   * The text containing the markdown from the `documentation.md` file in assets.
-   */
+  /** The text containing the markdown from the `documentation.md` file in assets. */
   public docText: any;
-  /**
-   * The boolean representing if a favicon path has been provided by the user.
-   */
+  /** The boolean representing if a favicon path has been provided by the user. */
   public FAVICON_SET = false;
-  /**
-   * The path to the user-provided favicon .ico file.
-   */
+  /** The path to the user-provided favicon .ico file. */
   public faviconPath: string;
-  /**
-   * The earliest date that can be chosen in the Material datepicker, or manually entered in the date input field.
-   */
+  /** The earliest date that can be chosen in the Material datepicker, or manually entered in the date input field. */
   public firstLegalDate: Date;
-  /**
-   * Boolean representing whether the initial Leaflet map is being created, or if it has already been created.
-   */
+  /** Boolean representing whether the initial Leaflet map is being created, or if it has already been created. */
   public initMap = true;
-  /**
-   * The latest date that can be chosen in the Material datepicker, or manually entered in the date input field.
-   */
+  /** The latest date that can be chosen in the Material datepicker, or manually entered in the date input field. */
   public lastLegalDate: Date;
   /**
    * The configuration object for tracking a Leaflet map's state between tabs.
@@ -76,15 +50,10 @@ export class AppService {
     long?: string,
     zoom?: number
   };
-  /**
-   * The map configuration object, from `map-config.json`.
-   */
+  /** The map configuration object, from `map-config.json`. */
   public mapConfig: Object;
-   /**
-    * Array to hold Leaflet map objects, for remembering state when switching between nav bar tabs.
-    */
+   /** Array to hold Leaflet map objects, for remembering state when switching between nav bar tabs. */
   public mapList: any[];
-  
 
 
   /**
@@ -112,7 +81,9 @@ export class AppService {
     return false;
   }
 
-  /* function that returns the list of basins in the map */ 
+  /**
+   * @returns The array of basins in the map.
+   */
   public formatBasins(SNODAS_Geometry: any): any[] {
     SNODAS_Geometry.features.sort(function(a: any, b: any) {
       if (a["properties"]["LOCAL_NAME"].toLowerCase() < b["properties"]["LOCAL_NAME"].toLowerCase()) {
@@ -321,8 +292,7 @@ export class AppService {
 
   /**
    * Uses the HttpClient to perform a GET request and retrieves the contents of the `map-config.json` file, and any other
-   * files that are only once, e.g. About & Documentation markdown files. This is
-   * done before app initialization.
+   * files that are only once, e.g. About & Documentation markdown files. This is done before app initialization.
    * @returns A promise.
    */
    public async loadConfigFiles() {
@@ -330,6 +300,7 @@ export class AppService {
     const mapTabData = await this.http.get('assets/map-config.json')
       .toPromise();
     this.mapConfig = mapTabData;
+
     // Set the development environment for the app.
     this.setDevEnv(this.mapConfig['devEnv']);
 

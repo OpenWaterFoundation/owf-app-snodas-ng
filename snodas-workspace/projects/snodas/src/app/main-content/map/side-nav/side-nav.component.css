@@ -90,7 +90,7 @@ p#current-basin-display {
 }
 
 /* Styling for the currently displayed human readable xxxx-xx-xx date under Current SNODAS Date. */
-span#current-date-display {
+span#selected-date-display {
   font-size: 20px;
 }
 

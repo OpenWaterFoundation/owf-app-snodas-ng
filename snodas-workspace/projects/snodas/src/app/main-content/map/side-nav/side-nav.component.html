@@ -1,6 +1,6 @@
 <div id="main">
 
-  <mat-form-field id="select-form">
+  <mat-form-field id="select-form" appearance="fill">
     <mat-label>Select Date</mat-label>
     <mat-select name="date-selection"
                 (openedChange)="openSelectChange($event)">
@@ -8,6 +8,7 @@
       [itemSize]="48"
       [minBufferPx]="540"
       [maxBufferPx]="540"
+      [style.width.px]="311"
       [style.height.px]="240">
         <input matInput
               id="search"
@@ -23,8 +24,8 @@
     </mat-select>
   </mat-form-field>
 
-  <h5><u>Current SNODAS Date</u></h5>
-  <span id="current-date-display">{{currentDateDisplay}}</span>
+  <h5><u>Selected SNODAS Date</u></h5>
+  <span id="selected-date-display">{{currentDateDisplay}}</span>
 
   <hr id="divider"><!-- Divider between the SNODAS animation Form Field and Select Basin Form Field dropdown. -->
 
@@ -104,7 +105,7 @@
   <button mat-raised-button
           id="single-line"
           class="graph-button"
-          (click)="openImageDialog('-UpstreamTotal-SNODAS-SWE-Volume-Gain-Cumulative.png')"
+          (click)="openImageDialog('-SNODAS-SWE-Volume-Gain-Cumulative.png')"
           [disabled]="isBasinSelected | menuDisable">
     SWE Volume Gain, Cumulative
   </button>
@@ -112,7 +113,7 @@
   <button mat-raised-button
           id="multi-line"
           class="graph-button"
-          (click)="openImageDialog('-SNODAS-SWE-Volume-Gain-Cumulative.png')"
+          (click)="openImageDialog('-UpstreamTotal-SNODAS-SWE-Volume-Gain-Cumulative.png')"
           [disabled]="isBasinSelected | menuDisable">
     SWE Upstream Total Volume Gain, Cumulative
   </button>
@@ -136,17 +137,21 @@
                                 [min]="minDate"
                                 [max]="maxDate"
                                 separator="to">
+            <!-- (dateChange)="dateStartChange(rangeStartDate)" -->
             <input matStartDate
+                    #rangeStartDate
                     class="range-input"
                     formControlName="startDate"
                     placeholder="Start Date">
-            <input matEndDate 
+            <!-- (dateChange)="dateEndChange(rangeEndDate)" -->
+            <input matEndDate
+                    #rangeEndDate
                     class="range-input"
                     formControlName="endDate"
                     placeholder="End Date">
           </mat-date-range-input>
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-date-range-picker #picker [startAt]="minDate"></mat-date-range-picker>
+          <mat-date-range-picker #picker [startAt]="maxDate"></mat-date-range-picker>
 
           <mat-error *ngIf="dateRange.controls.startDate.hasError('matStartDateInvalid')">Invalid start date</mat-error>
           <mat-error *ngIf="dateRange.controls.endDate.hasError('matEndDateInvalid')">Invalid end date</mat-error>
@@ -181,6 +186,7 @@
       <button mat-raised-button
               id="animation-button"
               (click)="pauseAnimation()"
+              [disabled]="animationPaused | menuDisable : 'pause' : animationCompleted : animationPlaying"
               matTooltip="Pause animation"
               [matTooltipShowDelay]="750"
               matTooltipPosition="above">
