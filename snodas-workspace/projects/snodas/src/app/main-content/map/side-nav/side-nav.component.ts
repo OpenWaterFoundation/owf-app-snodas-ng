@@ -5,12 +5,11 @@ import { Component,
           OnInit, 
           Output,
           ViewChild }               from '@angular/core';
-import { FormGroup,
-          FormGroupDirective,
+import { AbstractControl,
           FormControl,
-          NgForm,
-          Validators }              from '@angular/forms';
-import { ErrorStateMatcher }        from '@angular/material/core';
+          FormBuilder,
+          Validators,
+          ValidatorFn }             from '@angular/forms';
 import { MatDialog,
           MatDialogConfig,
           MatDialogRef }            from '@angular/material/dialog';
@@ -45,6 +44,19 @@ export class SideNavComponent implements OnInit, OnDestroy {
    * be smaller than the animationIndex.
    */
   public animationEndIndex: number;
+  /**
+   * A FormGroup built by the formBuilder used by the animation expansion panel. Consists of
+   * startDate    - The starting date selected or typed into the Mat Datepicker input field. Is required and must be a date
+   *                in-between 2003-09-30 to present day, and before the endDate.
+   * endDate      - The ending date selected or typed into the Mat Datepicker input field. Is required and must be a date in-
+   *                between 2003-09-30 to present day, and after the startDate.
+   * dayIncrement - The amount of days the animation will increment by. Is required and must be an integer.
+   */
+  public animationForm = this.formBuilder.group({
+    startDate: new FormControl('', [Validators.required, this.validateStartDate()]),
+    endDate: new FormControl('', [Validators.required, this.validateEndDate()]),
+    dayIncrement: new FormControl(1, [Validators.required, Validators.pattern('[0-9]+')])
+  })
   /** The starting index to represent where in the animation subset array  */
   public animationIndex: number;
   /** The ID value of the animation setInterval. Used as a reference to stop the timer. */
@@ -64,21 +76,15 @@ export class SideNavComponent implements OnInit, OnDestroy {
    * looks for the first element or directive matching the selector in the view DOM, and if it changes, the property is updated.
    */
   @ViewChild(CdkVirtualScrollViewport, { static: false }) cdkVirtualScrollViewPort: CdkVirtualScrollViewport;
-  /**
-   * A FormGroup for the animation expansion panel. Consists of
-   * startDate    - The starting date selected or typed into the Mat Datepicker input field.
-   * endDate      - The ending date selected or typed into the Mat Datepicker input field.
-   * dayIncrement - The amount of days the animation will increment by.
-   */
-  public dateRange = new FormGroup({
-    startDate: new FormControl(Validators.required),
-    endDate: new FormControl(Validators.required),
-    dayIncrement: new FormControl(1, [Validators.required, Validators.pattern('[0-9]+')])
-  });
   /** The current date retrieved from the parent MapComponent to be displayed in a human-readable format. */
   @Input() currentDateDisplay: string;
-  /**  */
-  public errorMatcher = new MyErrorStateMatcher();
+  /**
+   * 
+   */
+  public errorMessages = {
+    badDate: 'Invalid Date',
+    required: 'Required'
+  }
   /**
    * Subscription to an event using data binding in the Map Component (parent) template file. Receives the
    * Local_Id as an event when a basin is clicked on.
@@ -127,6 +133,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
    * @param dialog 
    */
   constructor(private appService: AppService,
+              private formBuilder: FormBuilder,
               public dialog: MatDialog) {
     // Set all dates from the list of dates set in the App Service, then set the input/search-used selectedDates array.
     this.allDates = this.appService.getDatesDashes();
@@ -178,18 +185,16 @@ export class SideNavComponent implements OnInit, OnDestroy {
    * @returns A string in the format `YYYY-MM-DD`.
    */
   private convertDateToString(date: Date): string {
-    return date.getFullYear() + '-' + this.zeroPad((date.getMonth() + 1), 2) + '-' + this.zeroPad(date.getDate(), 2);
+    return date.toISOString().split('T')[0];
   }
 
-  public dateEndChange(rangeEndDate: any): any {
-    console.log();
-    console.log(rangeEndDate.value);
-  }
-
-  public dateStartChange(rangeStartDate: any): any {
-    console.log(rangeStartDate.value);
-    rangeStartDate.value = this.addDays(rangeStartDate.value, 1);
-    console.log(rangeStartDate.value);
+  /**
+   * 
+   * @param control 
+   * @returns 
+   */
+  public formErrors(control: AbstractControl): string[] {
+    return control.errors ? Object.keys(control.errors) : [];
   }
 
   /**
@@ -297,12 +302,12 @@ export class SideNavComponent implements OnInit, OnDestroy {
    */
   public playAnimation(): void {
     // Check to see if all the form fields are entered correctly, and if not, don't do anything.
-    if (this.dateRange.value.startDate instanceof Function || this.dateRange.value.endDate instanceof Function ||
-        !Number.isInteger(Number(this.dateRange.value.dayIncrement))) {
+    if (this.animationForm.value.startDate instanceof Function || this.animationForm.value.endDate instanceof Function ||
+        !Number.isInteger(Number(this.animationForm.value.dayIncrement))) {
       return;
     }
     // Check if the dates given are within the animation boundaries, and if not, don't do anything.
-    if (this.dateRange.value.startDate < this.minDate || this.dateRange.value.endDate > this.maxDate) {
+    if (this.animationForm.value.startDate < this.minDate || this.animationForm.value.endDate > this.maxDate) {
       return;
     }
 
@@ -319,19 +324,27 @@ export class SideNavComponent implements OnInit, OnDestroy {
         this.restartClicked = false;
         return;
       }
-
-      this.animationStartDate = this.convertDateToString(this.dateRange.value.startDate);
+      // Convert the date to an ISO string so it can be searched for in the array of all dates from the ListOfDates.txt.
+      this.animationStartDate = this.convertDateToString(new Date(this.animationForm.value.startDate));
+      // Determine the index to start from in allDates.
       this.animationIndex = this.allDates.indexOf(this.animationStartDate);
 
-      this.animationEndDate = this.convertDateToString(this.dateRange.value.endDate)
+      this.animationEndDate = this.convertDateToString(new Date(this.animationForm.value.endDate));
       this.animationEndIndex = this.allDates.indexOf(this.animationEndDate);
 
+      // If one of the dates can't be found, don't do anything.
+      if (this.animationIndex === -1 || this.animationEndIndex === -1) {
+        return;
+      }
+
       // The total amount of milliseconds between days. This is built into Date objects.
-      var diffTime = this.dateRange.value.endDate - this.dateRange.value.startDate;
+      var endDate = new Date(this.animationForm.value.endDate);
+      var startDate = new Date(this.animationForm.value.startDate);
+      var diffTime = endDate.getTime() - startDate.getTime();
       // The total amount of days the date range encapsulates by multiplying by milliseconds, seconds, minutes & days.
       var totalDays = Math.ceil(diffTime) / (1000 * 60 * 60 * 24) + 1;
       // The number of times the slider will step across the entire width by diving the total days by the day increment.
-      var sliderStep = Math.ceil(totalDays / Number(this.dateRange.value.dayIncrement));
+      var sliderStep = Math.ceil(totalDays / Number(this.animationForm.value.dayIncrement));
       // The number - or percent - to increase the slider by. The slider value can be a percent, which helps keep the movement
       // integrity on longer ranges. 
       this.animationSliderInc = 100 / sliderStep;
@@ -364,7 +377,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
       // Update the map here.
       _this.updateMapDateFunction.emit(_this.allDates[_this.animationIndex]);
       // Move the animation index down by the incremented field.
-      _this.animationIndex -= Number(_this.dateRange.value.dayIncrement);
+      _this.animationIndex -= Number(_this.animationForm.value.dayIncrement);
     }, 1000);
   }
   
@@ -452,6 +465,53 @@ export class SideNavComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Validates the end date is a date, in-between September 30th, 2003 and present day, and greater than the start date.
+   * @returns An object with the string badDate as the key, and the incorrect value as the value.
+   * Otherwise null if no errors found. 
+   */
+   private validateEndDate(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      var endDate = new Date(control.value);
+      var badDate = { badDate: control.value };
+
+      if (endDate.toString() !== 'Invalid Date') {
+        if (endDate < new Date('2003-09-30') || endDate > new Date()) {
+          return badDate;
+        } else if (new Date(this.animationForm.value.startDate).toString() !== 'Invalid Date') {
+          return new Date(this.animationForm.value.startDate) > endDate ? badDate : null;
+        } else {
+          return null;
+        }
+      }
+      return badDate;
+    }
+      
+  }
+
+  /**
+   * Validates the start date is a date, in-between September 30th, 2003 and present day, and less than the end date.
+   * @returns An object with the string badDate as the key, and the incorrect value as the value.
+   * Otherwise null if no errors found. 
+   */
+  private validateStartDate(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      var startDate = new Date(control.value);
+      var badDate = { badDate: control.value };
+
+      if (startDate.toString() !== 'Invalid Date') {
+        if (startDate < new Date('2003-09-30') || startDate > new Date()) {
+          return badDate;
+        } else if (new Date(this.animationForm.value.endDate).toString() !== 'Invalid Date') {
+          return new Date(this.animationForm.value.endDate) < startDate ? badDate : null;
+        } else {
+          return null;
+        }
+      }
+      return badDate;
+    }
+  }
+
+  /**
    * Helper function that left pads a number by a given amount of places, e.g. num = 1, places = 2, returns 01
    * @param num The number that needs padding
    * @param places The amount the padding will go out to the left
@@ -460,24 +520,4 @@ export class SideNavComponent implements OnInit, OnDestroy {
     return String(num).padStart(places, '0');
   }
 
-}
-
-/**
- * Error class for when invalid control is dirty, touched, or submitted. This overrides default error display settings
- * and will show errors instantly.
- */
-export class MyErrorStateMatcher implements ErrorStateMatcher {
-  public isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
-    // console.log(control.value);
-    // console.log(form.control);
-    // console.log(form.value);
-    // console.log(form.status);
-    // How would I check if a date is out of bounds using minDate and maxDate from the Component?
-    // if (form.value.startDate && form.value.startDate instanceof Date) {
-    //   return 
-    // }
-
-    const isSubmitted = form && form.submitted;
-    return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
-  }
 }
