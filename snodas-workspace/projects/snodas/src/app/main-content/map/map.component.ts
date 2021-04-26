@@ -1,8 +1,6 @@
 import { Component,
-          ChangeDetectorRef,
           OnDestroy,
           OnInit, }     from '@angular/core';
-import { MediaMatcher } from "@angular/cdk/layout";
 import { Subject, Subscription } from 'rxjs';
 
 import { AppService }   from '../../app.service';
@@ -20,7 +18,6 @@ declare var L: any;
   styleUrls: ['./map.component.css']
 })
 export class MapComponent implements OnInit, OnDestroy {
-
   /** The background layer of the map. */
   public background: any;
   /** The Leaflet layer containing the Colorado boundary. */

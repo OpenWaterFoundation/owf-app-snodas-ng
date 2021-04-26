@@ -279,7 +279,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
       width: "900px",
       minHeight: "560px",
       minWidth: "525px",
-      maxHeight: "65vh",
+      maxHeight: "90vh",
       maxWidth: "80vw"
     });
     this.windowManager.addWindow(windowID, WindowType.DOC);
