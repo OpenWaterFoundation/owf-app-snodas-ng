@@ -129,45 +129,52 @@
         </mat-panel-title>
       </mat-expansion-panel-header>
 
-      <div id="animation-form-input" [formGroup]="dateRange">
-        <mat-form-field id="date-picker-form" appearance="fill">
-    
-          <mat-label>Enter a date range</mat-label>
-          <mat-date-range-input [rangePicker]="picker"
-                                [min]="minDate"
-                                [max]="maxDate"
-                                separator="to">
-            <!-- (dateChange)="dateStartChange(rangeStartDate)" -->
-            <input matStartDate
-                    #rangeStartDate
-                    class="range-input"
-                    formControlName="startDate"
-                    placeholder="Start Date">
-            <!-- (dateChange)="dateEndChange(rangeEndDate)" -->
-            <input matEndDate
-                    #rangeEndDate
-                    class="range-input"
-                    formControlName="endDate"
-                    placeholder="End Date">
-          </mat-date-range-input>
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-date-range-picker #picker [startAt]="maxDate"></mat-date-range-picker>
+      <div id="animation-form-input">
 
-          <mat-error *ngIf="dateRange.controls.startDate.hasError('matStartDateInvalid')">Invalid start date</mat-error>
-          <mat-error *ngIf="dateRange.controls.endDate.hasError('matEndDateInvalid')">Invalid end date</mat-error>
-    
+        <div matTooltip="Supported formats: YYYY-MM-DD, MM/DD/YYYY"
+              matTooltipPosition="above">
+          
+          <mat-form-field id="date-picker-form"
+                        appearance="fill">
+
+          <mat-label>Enter start date</mat-label>
+          <input matInput
+                  class="start-date-input"
+                  [formControl]="animationForm.get('startDate')"
+                  placeholder="Start Date">
+          <mat-error>
+            <ng-container *ngFor="let error of formErrors(animationForm.get('startDate'))">
+              {{ errorMessages[error] }} <br>
+            </ng-container>
+          </mat-error>
         </mat-form-field>
+
+        <mat-form-field id="date-picker-form"
+                        appearance="fill">
+          <mat-label>Enter end date</mat-label>
+          <input matInput
+                  class="end-date-input"
+                  [formControl]="animationForm.get('endDate')"
+                  placeholder="End Date">
+          <mat-error>
+            <ng-container *ngFor="let error of formErrors(animationForm.get('endDate'))">
+              {{ errorMessages[error] }} <br>
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+        
+
+        </div>
 
         <mat-form-field id="day-increment-form">
           <mat-label>Increment in days</mat-label>
           <input matInput
-                  [errorStateMatcher]="errorMatcher"
-                  formControlName="dayIncrement">
-          <mat-error *ngIf="dateRange.controls.dayIncrement.hasError('pattern')"></mat-error>
+                  [formControl]="animationForm.get('dayIncrement')">
+          <mat-error *ngIf="animationForm.controls.dayIncrement.hasError('pattern')">Days must be a positive integer</mat-error>
         </mat-form-field>
+
       </div>
     
-      <!-- thumbLabel [displayWith]="formatLabel" -->
       <mat-slider id="date-slider"
                   [value]="sliderValue"
                   disabled="true"
@@ -207,3 +214,28 @@
 
   
 </div>
+
+<!-- Uses the Angular Material Datepicker input and calendar drop down. Has been put on ice because when the matStartDate and
+matEndDate input fields are given ISO strings, a bug causes the day typed in by a user to go back a day. Custom formatting
+and other fixes such as disabled the input were not solutions. -->
+<!-- <mat-date-range-input [rangePicker]="picker"
+                                [min]="minDate"
+                                [max]="maxDate"
+                                separator="to"
+                                disabled>
+            <input matStartDate
+                    #rangeStartDate
+                    class="range-input"
+                    formControlName="startDate"
+                    placeholder="Start Date">
+            <input matEndDate
+                    #rangeEndDate
+                    class="range-input"
+                    formControlName="endDate"
+                    placeholder="End Date">
+          </mat-date-range-input>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker [startAt]="maxDate" disabled="false"></mat-date-range-picker>
+
+          <mat-error *ngIf="dateRange.controls.startDate.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+          <mat-error *ngIf="dateRange.controls.endDate.hasError('matEndDateInvalid')">Invalid end date</mat-error> -->

@@ -14,6 +14,7 @@ export class AppDateAdapter extends NativeDateAdapter {
 
   format(date: Date, displayFormat: Object): string {
     if (displayFormat === 'input') {
+      // date.setDate(date.getDate() + 1);
       let day: string = date.getDate().toString();
       day = +day < 10 ? '0' + day : day;
       let month: string = (date.getMonth() + 1).toString();
@@ -28,13 +29,12 @@ export class AppDateAdapter extends NativeDateAdapter {
 
 export const APP_DATE_FORMATS: MatDateFormats = {
   parse: {
-    dateInput: { month: 'short', year: 'numeric', day: 'numeric' },
+    dateInput: { month: 'numeric', year: 'numeric', day: 'numeric' },
   },
   display: {
     dateInput: 'input',
     monthYearLabel: { year: 'numeric', month: 'numeric' },
-    dateA11yLabel: { year: 'numeric', month: 'long', day: 'numeric'
-    },
+    dateA11yLabel: { year: 'numeric', month: 'long', day: 'numeric' },
     monthYearA11yLabel: { year: 'numeric', month: 'long' },
   }
 };
