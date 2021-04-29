@@ -1,6 +1,7 @@
 import { Component,
           Inject }    from '@angular/core';
 import { DOCUMENT }   from '@angular/common';
+import { Title }      from '@angular/platform-browser';
 
 import { AppService } from './app.service';
 
@@ -10,7 +11,6 @@ import { AppService } from './app.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'snodas';
 
 
   /**
@@ -19,34 +19,36 @@ export class AppComponent {
    * @param document A DI Token representing the main rendering context. In a browser this is the DOM Document.
    */
   constructor(private appService: AppService,
-              @Inject(DOCUMENT) private document: HTMLDocument) {
+              private titleService: Title,
+              @Inject(DOCUMENT) private document: HTMLDocument) { }
 
+
+  public ngOnInit(): void {
     this.setFavicon();
+    this.setTitle();
   }
-
 
   /**
    * Dynamically uses the path to a user given favicon, or uses the default if no property in the app-config is detected.
-   * @param appConfig The app-config.json object.
    */
   private setFavicon(): void {
-
     // Check to see if a user defined path to a favicon has been set
-    // if (appConfig.favicon)
-    //   this.appService.setFaviconPath(appConfig.favicon);
-    // else {
+    if (this.appService.getFaviconPath()) {
+      this.document.getElementById('appFavicon')
+                  .setAttribute('href', this.appService.getAppPath() + this.appService.getFaviconPath());
+    }
+    else {
       // Favicon app configuration property not given. Use a default.
     this.document.getElementById('appFavicon')
                   .setAttribute('href', this.appService.getDefaultFaviconPath());
     //   return;
-    // }
-    
-    // Set the user defined favicon if the favicon has not been set yet (no default).
-    // if (!this.appService.faviconSet()) {
-    //   this.document.getElementById('appFavicon')
-    //                 .setAttribute('href', this.appService.getAppPath() + this.appService.getFaviconPath());
-    //   this.appService.setFaviconTrue();
-    // }
+    }
+  }
 
+  /**
+   * Sets the title of the current HTML document using the `title` property from the `app-config.json` file.
+   */
+  private setTitle(): void {
+    this.titleService.setTitle(this.appService.getAppTitle());
   }
 }

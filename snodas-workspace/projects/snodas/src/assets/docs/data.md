@@ -48,8 +48,8 @@ resources. The zip file contains a shapefile with daily statistics in the attrib
 
 
 <br><br><br><br>
-Refer to the [SNODAS Tools User Manual](software.openwaterfoundation.org/cdss-app-snodas-tools-doc-user/) and 
-[SNODAS Tools Developer Manual](software.openwaterfoundation.org/cdss-app-snodas-tools-doc-dev/) for more information.
+Refer to the [SNODAS Tools User Manual](http://software.openwaterfoundation.org/cdss-app-snodas-tools-doc-user/) and 
+[SNODAS Tools Developer Manual](http://software.openwaterfoundation.org/cdss-app-snodas-tools-doc-dev/) for more information.
 
 
 SNODAS data citation: National Operational Hydrologic Remote Sensing Center. 2004. Snow Data Assimilation System (SNODAS) Data Products at NSIDC, Version 1. SWE dataset. Boulder, Colorado USA. NSIDC: National Snow and Ice Data Center. doi: dx.doi.org/10.7265/N5TB14TC. Data are accessed daily, and historical period is also accessed as needed for historical period products.

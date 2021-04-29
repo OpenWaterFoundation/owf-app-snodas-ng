@@ -14,6 +14,8 @@ import { forkJoin,
 export class AppService {
   /** The text containing the markdown from the `about.md` file in assets. */
   public aboutText: any;
+  /** The app configuration object, from `app-config.json`. */
+  public appConfig: any;
   /** The current date displayed on the map. */
   public currDate: string;
   /**
@@ -26,8 +28,6 @@ export class AppService {
   public dataText: any;
   /** The list of dates. */
   public dates: any;
-  /** The hard-coded string of the path to the default icon path that will be used for the website if none is given. */
-  public readonly defaultFaviconPath = 'assets/img/coloradoDNR.ico';
   /** Variable to notify the app whether in a development (local) or production (State server) environment. */
   public devEnv: boolean;
   /** The text containing the markdown from the `documentation.md` file in assets. */
@@ -50,8 +50,6 @@ export class AppService {
     long?: string,
     zoom?: number
   };
-  /** The map configuration object, from `map-config.json`. */
-  public mapConfig: Object;
    /** Array to hold Leaflet map objects, for remembering state when switching between nav bar tabs. */
   public mapList: any[];
 
@@ -75,7 +73,7 @@ export class AppService {
    * 
    */
   public checkIfMapChanged(): boolean {
-    if (this.leafletConfig.lat !== this.mapConfig['lat']) {
+    if (this.leafletConfig.lat !== this.appConfig['lat']) {
       return true;
     }
     return false;
@@ -120,7 +118,28 @@ export class AppService {
   }
 
   /**
-   * 
+   * @returns The appConfig object.
+   */
+   public getAppConfig(): any {
+    return this.appConfig;
+  }
+
+  /**
+   * @returns The defined app path from the top-level src folder into assets/.
+   */
+  public getAppPath(): string {
+    return 'assets/';
+  }
+
+  /**
+   * @returns The title property from the `app-config.json` file.
+   */
+  public getAppTitle(): string {
+    return this.appConfig.title;
+  }
+
+  /**
+   * @returns The current basin's chart basin ID.
    */
   public getChartBasinID(): any {
     return this.chartBasinID;
@@ -128,14 +147,13 @@ export class AppService {
 
   /**
    * 
-   * @returns The current date the map is displaying
+   * @returns The current date the map is displaying.
    */
   public getCurrDate(): string {
     return this.currDate;
   }
 
   /**
-   * Standard getter for @var dates.
    * @returns The list of dates for the map.
    */
   public getDates(): any[] {
@@ -143,8 +161,7 @@ export class AppService {
   }
 
   /**
-   * 
-   * @returns 
+   * @returns An array of dates transformed into an ISO string in the format YYYY-MM-DD.
    */
   public getDatesDashes(){
     let dateArray = this.dates.slice(); // deep copy of the array
@@ -159,7 +176,7 @@ export class AppService {
    * @returns The string representing the default Favicon path.
    */
   public getDefaultFaviconPath(): string {
-    return this.defaultFaviconPath;
+    return 'assets/img/angular.ico';
   }
 
   /**
@@ -167,6 +184,17 @@ export class AppService {
    */
   public getDevEnv(): boolean {
     return this.devEnv;
+  }
+
+  public getFaviconPath(): string | undefined {
+    if (typeof this.appConfig.favicon === 'undefined' || this.appConfig.favicon === '') {
+      return undefined;
+    }
+    if (this.appConfig.favicon.startsWith('/')) {
+      return this.appConfig.favicon.substring(1);
+    } else {
+      return this.appConfig.favicon;
+    }
   }
 
   /**
@@ -215,13 +243,6 @@ export class AppService {
    */
   public getLastLegalDate(): Date {
     return this.lastLegalDate;
-  }
-
-  /**
-   * @returns The mapConfig object.
-   */
-  public getMapConfig() {
-    return this.mapConfig;
   }
 
   /**
@@ -291,18 +312,19 @@ export class AppService {
   }
 
   /**
-   * Uses the HttpClient to perform a GET request and retrieves the contents of the `map-config.json` file, and any other
-   * files that are only once, e.g. About & Documentation markdown files. This is done before app initialization.
+   * Uses the HttpClient to perform a GET request and retrieves the contents of the `app-config.json` file, and any other
+   * files that are only needed once, e.g. About & Documentation markdown files. This is done asynchronously before
+   * app initialization.
    * @returns A promise.
    */
    public async loadConfigFiles() {
     // Map Configuration
-    const mapTabData = await this.http.get('assets/map-config.json')
+    const mapTabData = await this.http.get('assets/app-config.json')
       .toPromise();
-    this.mapConfig = mapTabData;
+    this.appConfig = mapTabData;
 
     // Set the development environment for the app.
-    this.setDevEnv(this.mapConfig['devEnv']);
+    this.setDevEnv(this.appConfig['devEnv']);
 
     // About Tab Text
     const obj: Object = { responseType: 'text' as 'text' };
@@ -370,7 +392,7 @@ export class AppService {
   }
 
   /**
-   * Sets the @var devEnv depending on what is in the `map-config.json` file.
+   * Sets the @var devEnv depending on what is in the `app-config.json` file.
    * @param env Variable to notify the app whether in a development (local) or production (global, state server) environment.
    */
   public setDevEnv(env: boolean): void {
@@ -387,7 +409,7 @@ export class AppService {
 
   /** Sets the initial value for the Leaflet config object. */
   public setLeafletConfig(): void {
-    this.leafletConfig = JSON.parse(JSON.stringify(this.getMapConfig()));
+    this.leafletConfig = JSON.parse(JSON.stringify(this.getAppConfig()));
   }
 
   /** Sets the given key in the leafletConfig object to value, if the key exists. */
@@ -408,7 +430,7 @@ export class AppService {
       asyncData.push(this.getPlainText('https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/ListOfDates.txt'))
     }
 
-    asyncData.push(this.getJSONData(this.mapConfig['SNODAS_boundaries']));
+    asyncData.push(this.getJSONData(this.appConfig['SNODAS_boundaries']));
     
     return forkJoin(asyncData);
   }

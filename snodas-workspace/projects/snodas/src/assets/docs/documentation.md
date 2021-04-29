@@ -1,4 +1,4 @@
-## SNODAS Tools Documentation: ##
+## SNODAS Tools / Documentation: ##
 
 #### Analysis Process ####
 
