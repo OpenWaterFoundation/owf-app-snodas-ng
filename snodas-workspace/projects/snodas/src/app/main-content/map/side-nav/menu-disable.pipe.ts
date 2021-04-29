@@ -8,8 +8,7 @@ export class MenuDisablePipe implements PipeTransform {
    * Decides if a button or group of buttons are disabled depending on given arguments.
    * @param value The first argument given to the pipe. This is a boolean describing whether the field in question
    * has been populated, or possibly undefined.
-   * @param pipeType Optional string describing the type of pipe currently being used. Options can be play, pause, restart, and
-   * 
+   * @param pipeType Optional string describing the type of pipe currently being used. Options can be play, pause, and restart.
    * @param complete Optional boolean showing whether the animation has been completed.
    * @param playing Optional boolean showing whether the animation is currently playing.
    * @returns A boolean describing whether to enable or disable the given button.

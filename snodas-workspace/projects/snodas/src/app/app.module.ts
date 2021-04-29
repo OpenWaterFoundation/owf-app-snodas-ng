@@ -116,6 +116,8 @@ const convert = new Showdown.Converter({
       extensions: [bindings],
       flavor: 'github',
       noHeaderId: true,
+      openLinksInNewWindow: true,
+      parseImgDimensions: true,
       simpleLineBreaks: false,
       strikethrough: true,
       tables: true

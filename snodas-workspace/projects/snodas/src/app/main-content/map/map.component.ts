@@ -30,8 +30,8 @@ export class MapComponent implements OnInit, OnDestroy {
   private forkJoinSubscription$ = <any>Subscription;
   /** The main Leaflet map. */
   public mainMap: any;
-  /** The map configuration object obtained from map-config.json. */
-  public mapConfig: any;
+  /** The app configuration object obtained from app-config.json. */
+  public appConfig: any;
   /** GeoJSON layer containing the merged SNODAS basin boundary geoJSON file and CSV file data of the basin by date. */
   public basinBoundaryWithData: any;
   /** Info panel on bottom left of the map. */
@@ -295,35 +295,19 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param currDate The current date of the initial display of the map.
    */
   private initMap(): void  {
-    /** Hold this class instance for use in smaller scoped functions that contain their own `this`. */
+    // Hold this class instance for use in smaller scoped functions that contain their own `this`.
     var _this = this;
 
-    // Creates the map inside the div and centers on Colorado. Uses the leafletConfig object to set the view and zoom on the
-    // map, as 
+    // Creates the map inside the div and centers on Colorado. Uses the leafletConfig object to set the view and zoom on the map.
     this.mainMap = L.map('mapID', {
       zoomControl: false,
       preferCanvas: false,
       wheelPxPerZoomLevel: 150,
       zoomSnap: 0.1
-    }).setView([this.mapConfig.lat, this.mapConfig.long], this.mapConfig.zoom);
-
-    // var change = this.appService.checkIfMapChanged();
-    // console.log(change);
-
-    // if (change === true) {
-    //   this.mainMap.setView([this.appService.getLeafletConfig()['lat'], this.appService.getLeafletConfig()['long']],
-    //   this.appService.getLeafletConfig()['zoom']);
-    // }
-
-    // this.mainMap.on('move', function() {
-    //   _this.appService.setLeafletConfigProp('zoom', _this.mainMap.getZoom());
-    //   var mapCenter = _this.mainMap.getBounds().getCenter();
-    //   _this.appService.setLeafletConfigProp('lat', mapCenter['lat']);
-    //   _this.appService.setLeafletConfigProp('long', mapCenter['lng']);
-    // });    
+    }).setView([this.appConfig.lat, this.appConfig.long], this.appConfig.zoom);  
 
     // The background layer for the map
-    this.background = L.tileLayer(this.mapConfig.tiles, {
+    this.background = L.tileLayer(this.appConfig.tiles, {
       attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy;<a href="http://mapbox.com">Mapbox</a>',
       maxZoom: 18
     }).addTo(this.mainMap);
@@ -372,7 +356,7 @@ export class MapComponent implements OnInit, OnDestroy {
     legend.addTo(this.mainMap);
 
     // Grabs data from CO_boundary.geojson and adds it to the map. Creates the black border around Colorado.
-    this.appService.getJSONData(this.mapConfig.state_border).subscribe((border: any) => {
+    this.appService.getJSONData(this.appConfig.state_border).subscribe((border: any) => {
       _this.COBoundary = L.geoJSON(border, {style: this.setStateBoundaryStyle}).addTo(this.mainMap);
       // Bring the border to the back of the layers, as it's only there for reference
       _this.COBoundary.bringToBack();
@@ -438,8 +422,8 @@ export class MapComponent implements OnInit, OnDestroy {
    * Called after the constructor, initializing input properties, and the first call to ngOnChanges.
    */
   ngOnInit(): void {
-    // Set the pre-initialized mapConfig JSON object to mapConfig.
-    this.mapConfig = this.appService.getMapConfig();
+    // Set the pre-initialized appConfig JSON object to appConfig.
+    this.appConfig = this.appService.getAppConfig();
 
     this.forkJoinSubscription$ = this.appService.setMapData().subscribe((results: any) => {
       // Results are as follows:
@@ -451,8 +435,9 @@ export class MapComponent implements OnInit, OnDestroy {
 
       // Set the initial current date from the ListOfDates.txt file.
       this.appService.setCurrDate(this.appService.getDates()[0]);
-
+      // Initialize the map for the first time.
       if (this.appService.isInitMap() === true) {
+        // Set initMap to false.
         this.appService.mapCreated();
         this.appService.setLeafletConfig();
 
@@ -460,7 +445,9 @@ export class MapComponent implements OnInit, OnDestroy {
         this.initMap();
         // Build the map each update.
         this.buildMap(this.appService.getCurrDate(), 'none', false);
-      } else {
+      }
+      // Map has already been initialized.
+      else {
         // Initialize the Leaflet map with the current date.
         this.initMap();
         // Build the map each update.
