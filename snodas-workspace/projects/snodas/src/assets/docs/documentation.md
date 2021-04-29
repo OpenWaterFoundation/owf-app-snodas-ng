@@ -1,8 +1,10 @@
-## SNODAS Tools Documentation: ##
+## SNODAS Tools / Documentation ##
 
-#### Analysis Process ####
+### Analysis Process Summary ###
 
-SNODAS data are processed into data products using QGIS and Python software as follows:
+SNODAS data are processed into data products using
+[QGIS](https://qgis.org/) and
+[Python](https://www.python.org/) software as follows:
 
 1. Download daily SNODAS SWE national data.
 2. Clip the national data to the extent of the Colorado water supply basin boundaries and save as TIF image. 
@@ -15,9 +17,9 @@ by basin and by date to facilitate use in the website and by other applications.
 5. Process CSV files into time series graph products using CDSS TSTool software.
 6. Publish files to this CDSS SNODAS Tools website.
 
-#### Documentation ####
+### Documentation ###
+
 A summary of the analysis steps are described in the
-<a href="http://software.openwaterfoundation.org/cdss-app-snodas-tools-doc-user/" target="_blank">SNODAS Tools User
-Manual</a>. More detailed explanation is provided in the
-<a href="http://software.openwaterfoundation.org/cdss-app-snodas-tools-doc-dev/" target="_blank">SNODAS Tools
-Developer Manual</a>.</p>
+[SNODAS Tools User Manual](http://software.openwaterfoundation.org/cdss-app-snodas-tools-doc-user/).
+More detailed explanation is provided in the
+[SNODAS Tools Developer Manual](http://software.openwaterfoundation.org/cdss-app-snodas-tools-doc-dev/).

@@ -1,19 +1,21 @@
 ## SNODAS Tools / Data ##
 
 The national SNODAS data are available from the Snow Data Assimilation System (SNODAS) and can
-be viewed at National Operational Hydrologic Remote Sensing Center (NOHRSC). The SNODAS data are
-processed into statistical data products by the CDSS SNODAS Tools.
+be viewed at
+[National Operational Hydrologic Remote Sensing Center (NOHRSC)](https://www.nohrsc.noaa.gov/interactive/html/map.html)
+The SNODAS data are processed into statistical data products by the SNODAS Tools.
 
-The **Daily Data** and **Upstream Total Data Products** sections below use variables in URL's
-to show an example of what a URL could look like. They will need to be replaced with an
-appropriate value. Examples are as follows
+The ***Daily Data*** and ***Upstream Total Data Products*** sections below use variables in URL's
+to show example URLs for data files.
+The variable in examples must be replaced with an appropriate value. Examples are as follows:
 
 | Variable | Example | Description |
 | ---- | ---- | ---- |
 | `Local_Id` | `3280`,  `LAMC2U`, `EGLC2L_F` | The unique local basin ID. |
-| `YYYYMMDD` | `20170101`, `20181221`, `20200325` | The year, month, and day format used by CDSS. |
+| `YYYYMMDD` | `20170101`, `20181221`, `20200325` | The year, month, and day format used in data files. |
 
 ### Daily Data ###
+
 The output consists of comma-separated-value (CSV) files, including basin data for each day and
 historical period for each basin. Data files can be downloaded by accessing the following URL
 resources. The zip file contains a shapefile with daily statistics in the attribute table
@@ -21,35 +23,32 @@ resources. The zip file contains a shapefile with daily statistics in the attrib
 
 | Link for downloading data file | Description |
 | ---- | ---- |
-| `snodas.cdss.state.co.us/app/SnowpackStatisticsByBasin/SnowpackStatisticsByBasin_Local_Id.csv`<br>Ex: [snodas.cdss.state.co.us/app/SnowpackStatisticsByBasin/SnowpackStatisticsByBasin_3236.csv](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByBasin/SnowpackStatisticsByBasin_3236.csv) | CSV file for the basin with ID `Local_Id`. |
-| `snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_YYYYMMDD.csv`<br>Ex: [snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_20200708.csv](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_20200708.csv) | CSV file for all basins at the `YYYYMMDD` date.  |
-| [snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_LatestDate.csv](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_LatestDate.csv) | CSV file for all basins for the most recently pulled data. |
-| `snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_YYYYMMDD.geojson`<br>Ex: [snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_20200708.geojson](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_20200708.geojson) | GeoJSON file of all basins at the `YYYYMMDD` date. **Not currently working.** |
-| [snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_LatestDate.geojson](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_LatestDate.geojson) | GeoJSON file for all basins for the most recently pulled data. |
-| `snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_YYYYMMDD.zip`<br>Ex: [snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_20200708.zip](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_20200708.zip) | Shapefile from all basins at the `YYYYMMDD` date. |
-| [snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_LatestDate.zip](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_LatestDate.zip) | Shapefile for all basins for the most recently pulled data. |
+| `https://snodas.cdss.state.co.us/app/SnowpackStatisticsByBasin/SnowpackStatisticsByBasin_Local_Id.csv`<br>Example: [`https://snodas.cdss.state.co.us/app/SnowpackStatisticsByBasin/SnowpackStatisticsByBasin_3236.csv`](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByBasin/SnowpackStatisticsByBasin_3236.csv) | CSV file for the basin with ID `Local_Id`. |
+| `https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_YYYYMMDD.csv`<br>Example: [`https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_20200708.csv`](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_20200708.csv) | CSV file for all basins for the `YYYYMMDD` date.  |
+| [`https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_LatestDate.csv`](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_LatestDate.csv) | CSV file for all basins for the most recently processed data. |
+| `https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_YYYYMMDD.geojson`<br>Example: [`https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_20200708.geojson`](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_20200708.geojson) | GeoJSON file of all basins for the `YYYYMMDD` date. **Not currently working.** |
+| [`https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_LatestDate.geojson`](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_LatestDate.geojson) | GeoJSON file for all basins for the most recently processed data. |
+| `https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_YYYYMMDD.zip`<br>Example: [`https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_20200708.zip`](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_20200708.zip) | Shapefile from all basins for the `YYYYMMDD` date. |
+| [`https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_LatestDate.zip`](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_LatestDate.zip) | Shapefile for all basins for the most recently processed data. |
 
 ### Upstream Total Data Products ###
 
 | Link for downloading data file | Description |
 | ---- | ---- |
-| [snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_UpstreamTotal_LatestDate.csv](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_UpstreamTotal_LatestDate.csv) | Upstream data for all basins for the most recently pulled data. |
-| `snodas.cdss.state.co.us/app/SnowpackStatisticsByBasin/SnowpackStatisticsByBasin_UpstreamTotal_Local_Id.csv`<br>Ex: [snodas.cdss.state.co.us/app/SnowpackStatisticsByBasin/SnowpackStatisticsByBasin_UpstreamTotal_3236.csv](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByBasin/SnowpackStatisticsByBasin_UpstreamTotal_3236.csv) | Upstream data for the basin with ID `Local_Id` |
-| `snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_UpstreamTotal_YYYYMMDD.csv`<br>Ex: [snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_UpstreamTotal_20200708.csv](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_UpstreamTotal_20200708.csv) | Upstream data for all basins at the `YYYYMMDD` date. |
+| [`https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_UpstreamTotal_LatestDate.csv`](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_UpstreamTotal_LatestDate.csv) | Upstream data for all basins for the most recently processed data. |
+| `https://snodas.cdss.state.co.us/app/SnowpackStatisticsByBasin/SnowpackStatisticsByBasin_UpstreamTotal_Local_Id.csv`<br>Example: [`https://snodas.cdss.state.co.us/app/SnowpackStatisticsByBasin/SnowpackStatisticsByBasin_UpstreamTotal_3236.csv`](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByBasin/SnowpackStatisticsByBasin_UpstreamTotal_3236.csv) | Upstream data for the basin with ID `Local_Id` |
+| `https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_UpstreamTotal_YYYYMMDD.csv`<br>Example: [`https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_UpstreamTotal_20200708.csv`](https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_UpstreamTotal_20200708.csv) | Upstream data for all basins for the `YYYYMMDD` date. |
 
 ### Static Data Available for Download ###
 
 | Link for downloading data file | Description |
 | ---- | ---- |
-| [snodas.cdss.state.co.us/app/json/CO_boundary.geojson](https://snodas.cdss.state.co.us/app/json/CO_boundary.geojson) | State of Colorado boundary. |
-| [snodas.cdss.state.co.us/app/json/SNODAS_CO_BasinBoundaries.geojson](https://snodas.cdss.state.co.us/app/json/SNODAS_CO_BasinBoundaries.geojson) | Basin boundaries, same as daily boundaries. |
-| [snodas.cdss.state.co.us/app/StaticData/SNODAS_CO_BasinBoundaries.zip](https://snodas.cdss.state.co.us/app/StaticData/SNODAS_CO_BasinBoundaries.zip) | Input basin boundary layer shapefile. |
-| [snodas.cdss.state.co.us/app/StaticData/Watershed_Connectivity_v4.xlsx](https://snodas.cdss.state.co.us/app/StaticData/Watershed_Connectivity_v4.xlsx) | Input basin connectivity for total basin calculations. |
+| [`https://snodas.cdss.state.co.us/app/json/CO_boundary.geojson`](https://snodas.cdss.state.co.us/app/json/CO_boundary.geojson) | State of Colorado boundary. |
+| [`https://snodas.cdss.state.co.us/app/json/SNODAS_CO_BasinBoundaries.geojson`](https://snodas.cdss.state.co.us/app/json/SNODAS_CO_BasinBoundaries.geojson) | Basin boundaries, same as daily boundaries. |
+| [`https://snodas.cdss.state.co.us/app/StaticData/SNODAS_CO_BasinBoundaries.zip`](https://snodas.cdss.state.co.us/app/StaticData/SNODAS_CO_BasinBoundaries.zip) | Input basin boundary layer shapefile. |
+| [`https://snodas.cdss.state.co.us/app/StaticData/Watershed_Connectivity_v4.xlsx`](https://snodas.cdss.state.co.us/app/StaticData/Watershed_Connectivity_v4.xlsx) | Input basin connectivity for total basin calculations. |
 
-
-<br><br><br><br>
-Refer to the [SNODAS Tools User Manual](software.openwaterfoundation.org/cdss-app-snodas-tools-doc-user/) and 
-[SNODAS Tools Developer Manual](software.openwaterfoundation.org/cdss-app-snodas-tools-doc-dev/) for more information.
-
+Refer to the [SNODAS Tools User Manual](http://software.openwaterfoundation.org/cdss-app-snodas-tools-doc-user/) and 
+[SNODAS Tools Developer Manual](http://software.openwaterfoundation.org/cdss-app-snodas-tools-doc-dev/) for more information.
 
 SNODAS data citation: National Operational Hydrologic Remote Sensing Center. 2004. Snow Data Assimilation System (SNODAS) Data Products at NSIDC, Version 1. SWE dataset. Boulder, Colorado USA. NSIDC: National Snow and Ice Data Center. doi: dx.doi.org/10.7265/N5TB14TC. Data are accessed daily, and historical period is also accessed as needed for historical period products.
