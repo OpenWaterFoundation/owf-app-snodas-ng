@@ -425,12 +425,12 @@ export class AppService {
     var asyncData: Observable<any>[] = [];
     console.log('Development Environment:', this.getDevEnv());
     if (this.getDevEnv() === true) {
-      asyncData.push(this.getPlainText('assets/SnowpackStatisticsByDate/ListOfDates.txt'));
+      asyncData.push(this.getPlainText(this.appConfig.datesLocalPath));
     } else {
-      asyncData.push(this.getPlainText('https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/ListOfDates.txt'))
+      asyncData.push(this.getPlainText(this.appConfig.datesURL))
     }
 
-    asyncData.push(this.getJSONData(this.appConfig['SNODAS_boundaries']));
+    asyncData.push(this.getJSONData(this.appConfig.basinBoundaries));
     
     return forkJoin(asyncData);
   }

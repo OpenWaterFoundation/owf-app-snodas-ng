@@ -79,6 +79,22 @@ export class SideNavComponent implements OnInit, OnDestroy {
   /** The current date retrieved from the parent MapComponent to be displayed in a human-readable format. */
   @Input() currentDateDisplay: string;
   /**
+   * Array of supported quick pick date ranges. The default is no date range.
+   */
+  public readonly dateRangeChoice: any[] = [
+    { title: '----', fillType: '', tooltip: '' },
+    {
+      title: 'Current calendar year',
+      fillType: 'calYear',
+      tooltip: 'Fill date range from ' + this.convertDateToString(this.createDate('calYear')) + ' to current day'
+    },
+    {
+      title: 'Current water year',
+      fillType: 'waterYear',
+      tooltip: 'Fill date range from ' + this.convertDateToString(this.createDate('waterYear')) + ' to current day'
+    }
+  ]
+  /**
    * 
    */
   public errorMessages = {
@@ -189,6 +205,61 @@ export class SideNavComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Create a new date instance, set to a day dependant on the fillType, with a timezone offset.
+   * @param fillType The type of date to create, e.g. calYear, waterYear, etc.
+   * @returns A new timezone offset date based on the fillType
+   */
+  public createDate(dateType: string): Date {
+    var date = new Date();
+
+    switch(dateType) {
+      case '':
+        return this.offsetDate(date);
+      case 'calYear':
+        date.setMonth(0);
+        date.setDate(1);
+        return this.offsetDate(date);
+      case 'waterYear':
+        date.setFullYear(date.getFullYear() - 1);
+        date.setMonth(9);
+        date.setDate(1);
+        return this.offsetDate(date);
+    }
+  }
+
+  /**
+   * 
+   * @param startDateInput 
+   * @param endDateInput 
+   * @param fillType 
+   */
+  public fillDateRange(startDateInput: any, endDateInput: any, fillType: string): void {
+
+    var today = this.createDate('');
+
+    switch(fillType) {
+      case 'calYear':
+        var calYear = this.createDate('calYear');
+        // Set the start and end date values in the animation form.
+        this.animationForm.get('startDate').setValue(this.convertDateToString(calYear));
+        this.animationForm.get('endDate').setValue(this.convertDateToString(today));
+        startDateInput.value = this.convertDateToString(calYear);
+        endDateInput.value = this.convertDateToString(today);
+        break;
+      case 'waterYear':
+        var waterYear = this.createDate('waterYear');
+        // Set the start and end date values in the animation form.
+        this.animationForm.get('startDate').setValue(this.convertDateToString(waterYear));
+        this.animationForm.get('endDate').setValue(this.convertDateToString(today));
+        startDateInput.value = this.convertDateToString(waterYear);
+        endDateInput.value = this.convertDateToString(today);
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
    * 
    * @param control 
    * @returns 
@@ -240,6 +311,17 @@ export class SideNavComponent implements OnInit, OnDestroy {
    */
   ngOnDestroy(): void {
     this.eventsSubscription$.unsubscribe();    
+  }
+
+  /**
+   * Takes a Date object and manipulates the timezone so that if a user in Denver (MT) chooses an option that contains the
+   * first day of the year, it won't create a Date object that's a day before or ahead of the January 1st.
+   * @param date The date to offset according to user timezone.
+   * @returns A Date object with the user's timezone offset applied to the original Date.
+   */
+  private offsetDate(date: Date): Date {
+    var userTZOffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - userTZOffset);
   }
 
   /**
@@ -334,6 +416,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
       // If one of the dates can't be found, don't do anything.
       if (this.animationIndex === -1 || this.animationEndIndex === -1) {
+        console.log(this.allDates);
         return;
       }
 
@@ -352,7 +435,6 @@ export class SideNavComponent implements OnInit, OnDestroy {
       this.animationPaused = false;
     }
     
-
     // Call the map date function in the parent Map Component to update the map date and basins with each date
     // in the range of the animation. This will keep executing every N milliseconds until a conditional is met.
     this.animationInterval = setInterval(function() {
