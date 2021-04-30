@@ -3,6 +3,7 @@
 /*  */
 button#animation-button {
   background-color: #9DB66B;
+  height: 30px;
   margin: 0px 5px 0px 5px;
   width: 15%;
 }
@@ -19,6 +20,20 @@ button.graph-button {
 button#multi-line {
   background-color: #9DB66B;
   line-height: 1.5;
+}
+
+button.quick-pick {
+  background-color: #9DB66B;
+  font-size: 11px;
+  width: 45%;
+}
+
+button#quick-pick-left {
+  margin-right: 2.5%;
+}
+
+button#quick-pick-right {
+  margin-left: 2.5%;
 }
 
 button#select-date {
@@ -46,6 +61,10 @@ div#main {
   padding: 10px;
 }
 
+div#quick-pick-group {
+  margin-bottom: 10px;
+}
+
 /* Styling for all h3-6 headers in the side-nav */
 h3 {
   margin: 0px 0px 10px 0px;
@@ -67,6 +86,10 @@ h6 {
 hr#divider {
   color: black;
   margin: 0px 0px 4px 0px;
+}
+
+i.fa {
+  margin-bottom: 9px;
 }
 
 /*  */
@@ -153,13 +176,18 @@ input.start-date-input::placeholder {
 
 #date-slider {
   /* margin: 10px 0px 10px 0px; For when using the thumbLabel*/
-  margin-bottom: 5px;
   width: 90%;
 }
 
 #day-increment-form {
   margin: 15px 0px 0px 0px;
   padding: 0px;
+  width: 90%;
+}
+
+#date-range-select-form {
+  padding: 0px;
+  font-size: 11px;
   width: 90%;
 }
 

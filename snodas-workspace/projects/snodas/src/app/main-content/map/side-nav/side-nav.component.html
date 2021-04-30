@@ -129,39 +129,54 @@
         </mat-panel-title>
       </mat-expansion-panel-header>
 
-      <div id="animation-form-input">
+      <mat-form-field id="date-range-select-form" appearance="fill">
+        <mat-label>Select Predefined Date Range</mat-label>
+        <mat-select name="date-range-selection">
+          <mat-option *ngFor="let choice of dateRangeChoice"
+                      id="basin-option"
+                      [matTooltip]="choice.tooltip"
+                      matTooltipPosition="left"
+                      (click)="fillDateRange(startDateInput, endDateInput, choice.fillType)">
+            {{choice.title}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
+      <div id="animation-form-input">
+        <!-- Separate div from the form div so that the tooltip displays in between both date fields. This way, it won't
+          show up by one, and should help notify a user that the tooltip is for both fields. -->
         <div matTooltip="Supported formats: YYYY-MM-DD, MM/DD/YYYY"
               matTooltipPosition="above">
           
+          <mat-form-field id="date-picker-form" appearance="fill">
+
+            <mat-label>Enter start date</mat-label>
+            <input matInput
+                    class="start-date-input"
+                    [formControl]="animationForm.get('startDate')"
+                    placeholder="Start Date"
+                    #startDateInput>
+            <mat-error>
+              <ng-container *ngFor="let error of formErrors(animationForm.get('startDate'))">
+                {{ errorMessages[error] }} <br>
+              </ng-container>
+            </mat-error>
+          </mat-form-field>
+
           <mat-form-field id="date-picker-form"
-                        appearance="fill">
-
-          <mat-label>Enter start date</mat-label>
-          <input matInput
-                  class="start-date-input"
-                  [formControl]="animationForm.get('startDate')"
-                  placeholder="Start Date">
-          <mat-error>
-            <ng-container *ngFor="let error of formErrors(animationForm.get('startDate'))">
-              {{ errorMessages[error] }} <br>
-            </ng-container>
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field id="date-picker-form"
-                        appearance="fill">
-          <mat-label>Enter end date</mat-label>
-          <input matInput
-                  class="end-date-input"
-                  [formControl]="animationForm.get('endDate')"
-                  placeholder="End Date">
-          <mat-error>
-            <ng-container *ngFor="let error of formErrors(animationForm.get('endDate'))">
-              {{ errorMessages[error] }} <br>
-            </ng-container>
-          </mat-error>
-        </mat-form-field>
+                          appearance="fill">
+            <mat-label>Enter end date</mat-label>
+            <input matInput
+                    class="end-date-input"
+                    [formControl]="animationForm.get('endDate')"
+                    placeholder="End Date"
+                    #endDateInput>
+            <mat-error>
+              <ng-container *ngFor="let error of formErrors(animationForm.get('endDate'))">
+                {{ errorMessages[error] }} <br>
+              </ng-container>
+            </mat-error>
+          </mat-form-field>
         
 
         </div>

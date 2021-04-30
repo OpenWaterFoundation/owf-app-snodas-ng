@@ -13,7 +13,7 @@ export class MenuDisablePipe implements PipeTransform {
    * @param playing Optional boolean showing whether the animation is currently playing.
    * @returns A boolean describing whether to enable or disable the given button.
    */
-  transform(active: boolean, pipeType?: string, complete?: boolean, playing?: boolean): unknown {
+  transform(active: boolean, pipeType?: string, complete?: boolean, playing?: boolean, error?: any): unknown {
     // Check to see if the optional play argument is defined. If the animation is playing, then disable the play button.
     if (pipeType === 'play') {
       return active;

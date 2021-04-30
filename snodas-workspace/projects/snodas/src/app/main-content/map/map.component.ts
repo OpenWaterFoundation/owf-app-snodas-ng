@@ -38,7 +38,7 @@ export class MapComponent implements OnInit, OnDestroy {
   public info: any;
   /** Date display on top left of the map. */
   public mapDate: any;
-  /** The object containing the SNODAS basins data from the SNODAS_boundaries property in the map config file. */
+  /** The object containing the SNODAS basins data from the basinBoundaries property in the map config file. */
   public SNODAS_Geometry: any;
   /** Upper left zoom home map control. */
   public zoomHome: any;
@@ -300,9 +300,10 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Creates the map inside the div and centers on Colorado. Uses the leafletConfig object to set the view and zoom on the map.
     this.mainMap = L.map('mapID', {
-      zoomControl: false,
+      maxZoom: 16,
       preferCanvas: false,
       wheelPxPerZoomLevel: 150,
+      zoomControl: false,
       zoomSnap: 0.1
     }).setView([this.appConfig.lat, this.appConfig.long], this.appConfig.zoom);  
 
@@ -356,7 +357,7 @@ export class MapComponent implements OnInit, OnDestroy {
     legend.addTo(this.mainMap);
 
     // Grabs data from CO_boundary.geojson and adds it to the map. Creates the black border around Colorado.
-    this.appService.getJSONData(this.appConfig.state_border).subscribe((border: any) => {
+    this.appService.getJSONData(this.appConfig.stateBorder).subscribe((border: any) => {
       _this.COBoundary = L.geoJSON(border, {style: this.setStateBoundaryStyle}).addTo(this.mainMap);
       // Bring the border to the back of the layers, as it's only there for reference
       _this.COBoundary.bringToBack();
@@ -428,7 +429,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.forkJoinSubscription$ = this.appService.setMapData().subscribe((results: any) => {
       // Results are as follows:
       // results[0] - setDates: The plain text file list of dates from assets/ or the state server URL.
-      // results[1] - SNODAS_boundaries: The geoJSON file for the SNODAS boundaries (basins) in Colorado.
+      // results[1] - basinBoundaries: The geoJSON file for the SNODAS boundaries (basins) in Colorado.
 
       this.appService.setDates(results[0]);
       this.SNODAS_Geometry = results[1];
