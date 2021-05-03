@@ -12,6 +12,8 @@
 
 # Build the distribution in the staging area
 buildDist() {
+  local cleanScript exitCode googleAnalyticsTrackingId hrefMode indexFile optimizationArg
+ 
   # First build the site so that the "dist" folder contains current content.
   #
   # - see:  https://medium.com/@tomastrajan/6-best-practices-pro-tips-for-angular-cli-better-developer-experience-7b328bc9db81
@@ -55,9 +57,13 @@ buildDist() {
   # Run the ng build
   # - use the command line from 'copy-to-owf-amazon-s3.bat', which was used more recently
   # - this should be found in the Windows PATH, for example C:\Users\user\AppData\Roaming\npm\ng
-  # - TODO smalers 2021-04-29 --extractCss now generates a warning, need to check version somehow
-  logInfo "Start running:  ng build --prod=true --aot=true --baseHref=${ngBuildHrefOpt} --extractCss=true --namedChunks=false --outputHashing=all --output-path=${snodasDistFolder} --sourceMap=false ${optimizationArg}"
-  ng build --prod=true --aot=true --baseHref=${ngBuildHrefOpt} --extractCss=true --namedChunks=false --outputHashing=all --output-path=${snodasDistFolder} --sourceMap=false ${optimizationArg}
+  extractCss=""
+  if [ "${angularVersionMajor}" -lt 11 ]; then
+    # Angular < 11 needs but >= deals with it automatically.
+    extractCss="--extractCss=true"
+  fi
+  logInfo "Start running:  ng build --prod=true --aot=true --baseHref=${ngBuildHrefOpt} ${extractCss} --namedChunks=false --outputHashing=all --output-path=${snodasDistFolder} --sourceMap=false ${optimizationArg}"
+  ng build --prod=true --aot=true --baseHref=${ngBuildHrefOpt} ${extractCss} --namedChunks=false --outputHashing=all --output-path=${snodasDistFolder} --sourceMap=false ${optimizationArg}
   exitCode=$?
   logInfo "...done running 'ng build... (exit code ${exitCode})'"
   if [ "${exitCode}" -ne 0 ]; then
@@ -102,21 +108,32 @@ buildDist() {
     exit 1
   fi
 
-  # Clean the SNODAS distribution files to the bare minimum.
-  # - TODO smalers 2021-04-29 evaluate whether something is needed for SNODAS
-  # ${snodasRepoFolder}/build-util/clean-dist-for-deployment.sh
-  # exitCode=$?
-  # if [ ${exitCode} -ne 0 ]; then
-  #   logError "Error cleaning 'dist/' for deployment."
-  #   logError "Check script:  ${snodasRepoFolder}/build-util/clean-dist-for-deployment.sh."
-  #   exit 1
-  # fi
+  # Clean the SNODAS distribution files to the bare minimum for deployment.
+  cleanScript="${snodasRepoFolder}/build-util/clean-dist-for-deployment.sh"
+  if [ -f "${cleanScript}" ]; then
+    echo "Running script to remove unnecessary files: ${cleanScript}"
+    ${snodasRepoFolder}/build-util/clean-dist-for-deployment.sh
+    exitCode=$?
+    if [ ${exitCode} -ne 0 ]; then
+      logError "Error cleaning 'dist/' for deployment."
+      logError "Check script:  ${snodasRepoFolder}/build-util/clean-dist-for-deployment.sh."
+      exit 1
+    fi
+  fi
 }
 
 # Check to make sure the Angular version is as expected
-# - TODO smalers 2020-04-20 Need to implement
+# - set ${angularVersion} and ${angularVersionMajor} for use in configuring the command line,
+#   helps with compatibility
 checkAngularVersion() {
-  logWarning "Checking Angular version is not implemented.  Continuing."
+  logWarning "Checking Angular version."
+  # Run in the project folder to make sure project Angular version is found,
+  # not global Angular version.
+  cd ${snodasProjectFolder}
+  angularVersion=$(ng --version | grep -i "Angular CLI" | cut -d ':' -f 2 | tr -d ' ')
+  angularVersionMajor=$(echo ${angularVersion} | cut -d '.' -f 1)
+  echo "angularVersion=${angularVersion}"
+  echo "angularVersionMajor=${angularVersionMajor}"
 }
 
 # Check input
@@ -180,15 +197,15 @@ getUserLogin() {
 # - the version is in the 'about.md' file in format:  Website version 2.0.0 (2021-03-22)
 getVersion() {
   # Application version
-  if [ ! -f "${appAboutFile}" ]; then
-    logError "Application version file does not exist: ${appAboutFile}"
+  if [ ! -f "${appConfigFile}" ]; then
+    logError "Application configuration file does not exist: ${appConfigFile}"
     logError "Exiting."
     exit 1
   fi
-  # InfoMapper config file
+  # SNODAS config file
   # - TODO smalers 2021-04-28 may do something similar for SNODAS
   # - get the first match because for some reason the file may have redundant content
-  appVersion=$(grep -m 1 'Website version' ${appAboutFile} | cut -d " " -f 3 | tr -d ' ')
+  appVersion=$(grep -m 1 '"version"' ${appConfigFile} | cut -d ":" -f 2 | cut -d "(" -f 1 | tr -d ' ' | tr -d '"')
 }
 
 # Print a DEBUG message, currently prints to stderr.
@@ -437,20 +454,9 @@ uploadDist() {
 
 # Entry point into the script
 
-# Check the operating system
-checkOperatingSystem
-
-# Make sure the Angular version is OK
-checkAngularVersion
-
-# Get the user login
-# - necessary for the upload log
-getUserLogin
-
 # Get the folder where this script is located since it may have been run from any folder
 scriptFolder=$(cd $(dirname "$0") && pwd)
 repoFolder=$(dirname ${scriptFolder})
-webFolder=${repoFolder}/web
 gitReposFolder=$(dirname ${repoFolder})
 # Start must be consistent with SNODAS tools software...
 snodasRepoFolder="${gitReposFolder}/owf-app-snodas-ng"
@@ -461,23 +467,30 @@ snodasDistFolder="${snodasProjectFolder}/dist"
 snodasDistAppFolder="${snodasDistFolder}"
 # Application configuration file used to extract application version and Google Analytics tracking ID.
 # - TODO smalers 2021-04-29 need to implement application configuration file
-appConfigFile="${webFolder}/app-config.json"
-# Since no configuration file (yet), will use the about markdown file
-appAboutFile="${snodasProjectFolder}/src/assets/docs/about.md"
+appConfigFile="${snodasProjectFolder}/src/assets/app-config.json"
 # ...end must match SNODAS tools software
 programName=$(basename $0)
-programVersion="1.0.0"
-programVersionDate="2021-04-29"
+programVersion="1.2.0"
+programVersionDate="2021-05-02"
 logInfo "scriptFolder:         ${scriptFolder}"
-logInfo "Program name:         ${programName}"
+logInfo "programName:          ${programName}"
 logInfo "repoFolder:           ${repoFolder}"
-logInfo "webFolder:            ${webFolder}"
 logInfo "appConfigFile:        ${appConfigFile}"
 logInfo "gitReposFolder:       ${gitReposFolder}"
 logInfo "snodasRepoFolder:     ${snodasRepoFolder}"
 logInfo "snodasProjectFolder:  ${snodasProjectFolder}"
 logInfo "snodasDistFolder:     ${snodasDistFolder}"
 logInfo "snodasDistAppFolder:  ${snodasDistAppFolder}"
+
+# Check the operating system
+checkOperatingSystem
+
+# Make sure the Angular version is OK
+checkAngularVersion
+
+# Get the user login
+# - necessary for the upload log
+getUserLogin
 
 # S3 folder for upload
 # - put before parseCommandLine so can be used in print usage, etc.
