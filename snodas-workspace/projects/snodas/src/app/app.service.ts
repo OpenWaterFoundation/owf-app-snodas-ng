@@ -427,7 +427,7 @@ export class AppService {
     if (this.getDevEnv() === true) {
       asyncData.push(this.getPlainText(this.appConfig.datesLocalPath));
     } else {
-      asyncData.push(this.getPlainText(this.appConfig.datesURL))
+      asyncData.push(this.getPlainText(this.appConfig.datesURL));
     }
 
     asyncData.push(this.getJSONData(this.appConfig.basinBoundaries));

@@ -159,19 +159,6 @@ export class SideNavComponent implements OnInit, OnDestroy {
     this.maxDate = this.appService.getLastLegalDate();
   }
 
-
-  /**
-   * Adds N days to the given date to be given and shown on the Mat Datepicker input field.
-   * @param date The date to add days to.
-   * @param days The number of days to add to the @var date.
-   * @returns The new date, incremented N days from the original date.
-   */
-  private addDays(date: Date, days: number): Date {
-    let result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
-  }
-
   /**
    * Called when a mat-option is clicked from the Basin Mat Form Field. It sends data back to the Map component
    * with the basin name so the map and necessary Leaflet controls can be updated.
@@ -339,7 +326,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
         graphType === 'UpstreamTotal-SNODAS-SWE-Volume.png' ||
         isNaN(parseInt(this.selectedBasinID))) {
 
-      fullImagePath = 'https://snodas.cdss.state.co.us/app/SnowpackGraphsByBasin/' + this.selectedBasinID + graphType;
+      fullImagePath = 'https://snodas.cdss.state.co.us/data/SnowpackGraphsByBasin/' + this.selectedBasinID + graphType;
     } else {
       fullImagePath = 'assets/SnowpackGraphsByBasin/' + this.selectedBasinID + graphType;
     }
@@ -375,7 +362,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
     if ($event) {
       this.cdkVirtualScrollViewPort.scrollToIndex(0);
       this.cdkVirtualScrollViewPort.checkViewportSize();
-    } else {}
+    }
   }
   
   /**
