@@ -84,8 +84,8 @@ export class MapComponent implements OnInit, OnDestroy {
       // Build the string to be displayed
       temp = SNODASFile.replace("assets/SnowpackStatisticsByDate/SnowpackStatisticsByDate_", "").replace(".csv", "");
     } else {
-      SNODASFile = 'https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_' + currDate + '.csv';
-      temp = SNODASFile.replace("https://snodas.cdss.state.co.us/app/SnowpackStatisticsByDate/SnowpackStatisticsByDate_", "")
+      SNODASFile = 'https://snodas.cdss.state.co.us/data/SnowpackStatisticsByDate/SnowpackStatisticsByDate_' + currDate + '.csv';
+      temp = SNODASFile.replace("https://snodas.cdss.state.co.us/data/SnowpackStatisticsByDate/SnowpackStatisticsByDate_", "")
       .replace(".csv", "");
     }
     // Create the more human-readable date format to be displayed. This is what's being used in the side-nav component to be
