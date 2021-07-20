@@ -41,14 +41,12 @@ in the attribute table (attribute names have been truncated to adhere to shapefi
 
 ### Static Data Available for Download ###
 
-**TODO: Replace /app/ with data and make sure these files are actually in the GCP bucket.**
-
 | Link for downloading data file | Description |
 | ---- | ---- |
-| [`https://snodas.cdss.state.co.us/app/json/CO_boundary.geojson`](https://snodas.cdss.state.co.us/app/json/CO_boundary.geojson) | State of Colorado boundary. |
-| [`https://snodas.cdss.state.co.us/app/json/SNODAS_CO_BasinBoundaries.geojson`](https://snodas.cdss.state.co.us/app/json/SNODAS_CO_BasinBoundaries.geojson) | Basin boundaries, same as daily boundaries. |
-| [`https://snodas.cdss.state.co.us/app/StaticData/SNODAS_CO_BasinBoundaries.zip`](https://snodas.cdss.state.co.us/app/StaticData/SNODAS_CO_BasinBoundaries.zip) | Input basin boundary layer shapefile. |
-| [`https://snodas.cdss.state.co.us/app/StaticData/Watershed_Connectivity_v4.xlsx`](https://snodas.cdss.state.co.us/app/StaticData/Watershed_Connectivity_v4.xlsx) | Input basin connectivity for total basin calculations. |
+| [`https://snodas.cdss.state.co.us/data/StaticData/CO_boundary.geojson`](https://snodas.cdss.state.co.us/data/CO_boundary.geojson) | State of Colorado boundary. |
+| [`https://snodas.cdss.state.co.us/data/StaticData/SNODAS_CO_BasinBoundaries.geojson`](https://snodas.cdss.state.co.us/data/StaticData/SNODAS_CO_BasinBoundaries.geojson) | Basin boundaries, same as daily boundaries. |
+| [`https://snodas.cdss.state.co.us/data/StaticData/SNODAS_CO_BasinBoundaries.zip`](https://snodas.cdss.state.co.us/data/StaticData/SNODAS_CO_BasinBoundaries.zip) | Input basin boundary layer shapefile. |
+| [`https://snodas.cdss.state.co.us/data/StaticData/WatershedConnectivity/Watershed_Connectivity_v4.xlsx`](https://snodas.cdss.state.co.us/data/StaticData/WatershedConnectivity/Watershed_Connectivity_v4.xlsx) | Input basin connectivity for total basin calculations. |
 
 Refer to the [SNODAS Tools User Manual](http://software.openwaterfoundation.org/cdss-app-snodas-tools-doc-user/) and 
 [SNODAS Tools Developer Manual](http://software.openwaterfoundation.org/cdss-app-snodas-tools-doc-dev/) for more information.
