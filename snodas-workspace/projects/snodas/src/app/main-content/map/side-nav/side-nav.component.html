@@ -4,12 +4,11 @@
     <mat-label>Select Date</mat-label>
     <mat-select name="date-selection"
                 (openedChange)="openSelectChange($event)">
-      <cdk-virtual-scroll-viewport
-      [itemSize]="48"
-      [minBufferPx]="540"
-      [maxBufferPx]="540"
-      [style.width.px]="311"
-      [style.height.px]="240">
+      <cdk-virtual-scroll-viewport [itemSize]="48"
+                                    [minBufferPx]="540"
+                                    [maxBufferPx]="540"
+                                    [style.width.px]="311"
+                                    [style.height.px]="240">
         <input matInput
               id="search"
               placeholder="Search dates..."
@@ -153,6 +152,7 @@
             <mat-label>Enter start date</mat-label>
             <input matInput
                     class="start-date-input"
+                    (keyup)="startDateEvent($event)"
                     [formControl]="animationForm.get('startDate')"
                     placeholder="Start Date"
                     #startDateInput>
@@ -168,6 +168,7 @@
             <mat-label>Enter end date</mat-label>
             <input matInput
                     class="end-date-input"
+                    (keyup)="endDateEvent($event)"
                     [formControl]="animationForm.get('endDate')"
                     placeholder="End Date"
                     #endDateInput>

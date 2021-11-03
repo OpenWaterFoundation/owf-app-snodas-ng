@@ -5,10 +5,9 @@
   "tiles" : "https://basemap.nationalmap.gov/ArcGIS/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}",
   "stateBorder" : "assets/json/CO_boundary.geojson",
   "basinBoundaries" : "assets/json/SNODAS_CO_BasinBoundaries.geojson",
-  "datesLocalPath": "assets/SnowpackStatisticsByDate/ListOfDates.txt",
   "datesURL": "https://snodas.cdss.state.co.us/data/SnowpackStatisticsByDate/ListOfDates.txt",
   "devEnv": false,
   "favicon": "/img/coloradoDNR.ico",
   "title": "SNODAS | Daily Snow Data",
-  "version": "2.1.0 (2021-04-29)"
+  "version": "2.0.0 (2021-04-29)"
 }

@@ -43,7 +43,7 @@ in the attribute table (attribute names have been truncated to adhere to shapefi
 
 | Link for downloading data file | Description |
 | ---- | ---- |
-| [`https://snodas.cdss.state.co.us/data/StaticData/CO_boundary.geojson`](https://snodas.cdss.state.co.us/data/CO_boundary.geojson) | State of Colorado boundary. |
+| [`https://snodas.cdss.state.co.us/data/StaticData/CO_boundary.geojson`](https://snodas.cdss.state.co.us/data/StaticData/CO_boundary.geojson) | State of Colorado boundary. |
 | [`https://snodas.cdss.state.co.us/data/StaticData/SNODAS_CO_BasinBoundaries.geojson`](https://snodas.cdss.state.co.us/data/StaticData/SNODAS_CO_BasinBoundaries.geojson) | Basin boundaries, same as daily boundaries. |
 | [`https://snodas.cdss.state.co.us/data/StaticData/SNODAS_CO_BasinBoundaries.zip`](https://snodas.cdss.state.co.us/data/StaticData/SNODAS_CO_BasinBoundaries.zip) | Input basin boundary layer shapefile. |
 | [`https://snodas.cdss.state.co.us/data/StaticData/WatershedConnectivity/Watershed_Connectivity_v4.xlsx`](https://snodas.cdss.state.co.us/data/StaticData/WatershedConnectivity/Watershed_Connectivity_v4.xlsx) | Input basin connectivity for total basin calculations. |

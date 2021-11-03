@@ -71,10 +71,10 @@ export class SideNavComponent implements OnInit, OnDestroy {
   public animationStartDate: string;
   /** The amount of days the animation will increment by. */
   public animationStep: number;
-  /**
-   * The reference to the virtual scroll viewport in the template file by using the @ViewChild decorator. The change detector
-   * looks for the first element or directive matching the selector in the view DOM, and if it changes, the property is updated.
-   */
+  /** The reference to the virtual scroll viewport in the template file by using
+   * the @ViewChild decorator. The change detector looks for the first element or
+   * directive matching the selector in the view DOM, and if it changes, the property
+   * is updated. */
   @ViewChild(CdkVirtualScrollViewport, { static: false }) cdkVirtualScrollViewPort: CdkVirtualScrollViewport;
   /** The current date retrieved from the parent MapComponent to be displayed in a human-readable format. */
   @Input() currentDateDisplay: string;
@@ -101,15 +101,11 @@ export class SideNavComponent implements OnInit, OnDestroy {
     badDate: 'Invalid Date',
     required: 'Required'
   }
-  /**
-   * Subscription to an event using data binding in the Map Component (parent) template file. Receives the
-   * Local_Id as an event when a basin is clicked on.
-   */
+  /** Subscription to an event using data binding in the Map Component (parent)
+   * template file. Receives the Local_Id as an event when a basin is clicked on. */
   @Input() events: Observable<void>;
-  /**
-   * Variable representing the subscription to the Input() events above. Used to easily unsubscribe when
-   * this component is destroyed.
-   */
+  /** Variable representing the subscription to the Input() events above. Used to
+   * easily unsubscribe when this component is destroyed. */
   private eventsSubscription$: Subscription;
   /** Boolean describing whether a basin has been clicked. */
   public isBasinSelected = false;
@@ -117,7 +113,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
   public minDate: Date;
   /** The latest date a user can choose in the date picker. */
   public maxDate: Date;
-
+  /**  */
   public restartClicked: boolean;
   /** The filtered array of basins returned after a user searches for a basin in the Select Basin Map Input. */
   public selectedBasins: string[];
@@ -137,9 +133,8 @@ export class SideNavComponent implements OnInit, OnDestroy {
   @Output() updateBasinFunction = new EventEmitter<any>();
   /** EventEmitter that alerts the Map component (parent) that an update has happened, and sends the date. */
   @Output() updateMapDateFunction = new EventEmitter<any>();
-  /**
-   * The windowManager instance, whose job it will be to create, maintain, and remove multiple open dialogs from the InfoMapper.
-   */
+  /** The windowManager instance, whose job it will be to create, maintain, and
+   * remove multiple open dialogs from the InfoMapper. */
   public windowManager: WindowManager = WindowManager.getInstance();
 
 
@@ -158,6 +153,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
     this.minDate = this.appService.getFirstLegalDate();
     this.maxDate = this.appService.getLastLegalDate();
   }
+
 
   /**
    * Called when a mat-option is clicked from the Basin Mat Form Field. It sends data back to the Map component
@@ -211,6 +207,29 @@ export class SideNavComponent implements OnInit, OnDestroy {
         date.setMonth(9);
         date.setDate(1);
         return this.offsetDate(date);
+    }
+  }
+
+  /**
+   * Examine user input to determine whether to append a / or - character to improve
+   * user experience.
+   * @param event The KeyboardEvent object from the keyup event that occurs as
+   * the user inputs characters into the start date input.
+   */
+  public endDateEvent(event: KeyboardEvent): void {
+    // If user tries to delete, don't try to add anything.
+    if (event.key.toUpperCase() === 'BACKSPACE') return;
+    // Obtain user input using the animationForm group.
+    let dateInput: string = this.animationForm.controls['endDate'].value;
+
+    if (!dateInput.startsWith('19') && !dateInput.startsWith('20')) {
+      if (dateInput.length === 2 || dateInput.length === 5) {
+        this.animationForm.controls['endDate'].setValue(dateInput + '/');
+      }
+    } else if (dateInput.startsWith('19') || dateInput.startsWith('20')) {
+      if (dateInput.length === 4 || dateInput.length === 7) {
+        this.animationForm.controls['endDate'].setValue(dateInput + '-');
+      }
     }
   }
 
@@ -322,12 +341,11 @@ export class SideNavComponent implements OnInit, OnDestroy {
     }
 
     var fullImagePath: string;
-    if (graphType === '-SNODAS-SWE-Volume.png' ||
-        graphType === 'UpstreamTotal-SNODAS-SWE-Volume.png' ||
-        isNaN(parseInt(this.selectedBasinID))) {
-
-      fullImagePath = 'https://snodas.cdss.state.co.us/data/SnowpackGraphsByBasin/' + this.selectedBasinID + graphType;
-    } else {
+    var graphEnvType = 'data';
+    if (graphEnvType === 'data') {
+      fullImagePath = 'https://snodas.cdss.state.co.us/data/SnowpackGraphsByBasin/' +
+      this.selectedBasinID + graphType;
+    } else if (graphEnvType = 'assets') {
       fullImagePath = 'assets/SnowpackGraphsByBasin/' + this.selectedBasinID + graphType;
     }
 
@@ -403,7 +421,9 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
       // If one of the dates can't be found, don't do anything.
       if (this.animationIndex === -1 || this.animationEndIndex === -1) {
-        console.log(this.allDates);
+        // console.log(this.allDates);
+        console.error('The start date or end date does not exist in the current ' +
+        'list of dates. Confirm both dates are in the "Select Date" dropdown.');
         return;
       }
 
@@ -519,6 +539,29 @@ export class SideNavComponent implements OnInit, OnDestroy {
       });
     }
     
+  }
+
+  /**
+   * Examine user input to determine whether to append a / or - character to improve
+   * user experience.
+   * @param event The KeyboardEvent object from the keyup event that occurs as
+   * the user inputs characters into the start date input.
+   */
+  public startDateEvent(event: KeyboardEvent): void {
+    // If user tries to delete, don't try to add anything.
+    if (event.key.toUpperCase() === 'BACKSPACE') return;
+    // Obtain user input using the animationForm group.
+    let dateInput: string = this.animationForm.controls['startDate'].value;
+
+    if (!dateInput.startsWith('19') && !dateInput.startsWith('20')) {
+      if (dateInput.length === 2 || dateInput.length === 5) {
+        this.animationForm.controls['startDate'].setValue(dateInput + '/');
+      }
+    } else if (dateInput.startsWith('19') || dateInput.startsWith('20')) {
+      if (dateInput.length === 4 || dateInput.length === 7) {
+        this.animationForm.controls['startDate'].setValue(dateInput + '-');
+      }
+    }
   }
 
   /**

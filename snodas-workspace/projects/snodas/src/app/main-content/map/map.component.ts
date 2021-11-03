@@ -7,7 +7,6 @@ import { AppService }   from '../../app.service';
 
 import * as Papa        from 'papaparse';
 
-
 // import * as L         from 'leaflet';
 declare var L: any;
 
@@ -217,7 +216,7 @@ export class MapComponent implements OnInit, OnDestroy {
          * @param feature 
          * @returns 
          */
-        function setSWELayerStyle(feature: any){
+        function setSWELayerStyle(feature: any) {
           return {
             fillColor: _this.getColor((feature.properties.SNODAS_SWE_Mean_in == undefined ? feature.properties.SWE_Mean_inches:feature.properties.SNODAS_SWE_Mean_in)),
             weight: 1,
@@ -235,7 +234,7 @@ export class MapComponent implements OnInit, OnDestroy {
         This boolean value is used to highlight basins and will prevent the highlight to be removed when the
         user "mouseouts" of the basin.*/
         var oldBasin: any;
-        if(basin != 'none'){
+        if(basin != 'none') {
           clickOnMapItem(basin.slice(basin.indexOf('(')+1, basin.indexOf(')')));
         }
 
@@ -243,7 +242,7 @@ export class MapComponent implements OnInit, OnDestroy {
           // Once a basin has been clicked, use the eventsSubject Subject (which is also an observable and observer) and uses the
           // next method to send the selected basin's ID to the child side-nav component as an event.
           _this.eventsSubject.next(Local_ID);
-          if(basinSelected === true){
+          if(basinSelected === true) {
             var oldLayer = _this.basinBoundaryWithData.getLayer(oldBasin);
             oldLayer.feature.properties.hasBeenSelected = false;
             oldLayer.fireEvent('mouseout');
@@ -366,7 +365,7 @@ export class MapComponent implements OnInit, OnDestroy {
     // Top left corner of the map. Shows the current date the map is displaying
     this.mapDate = L.control({position: 'topleft'});
 
-    this.mapDate.onAdd = function(map: any){
+    this.mapDate.onAdd = function(map: any) {
       this._div = L.DomUtil.create('div', 'mapDate');
       this.update();
       return this._div;
@@ -382,7 +381,7 @@ export class MapComponent implements OnInit, OnDestroy {
     // Create the legend for daily basin statistics on the map.
     this.info = L.control({ position: 'bottomleft' });
 
-    this.info.onAdd = function(map: any){
+    this.info.onAdd = function(map: any) {
       this._div = L.DomUtil.create('div', 'info');
       this.update();
       return this._div;

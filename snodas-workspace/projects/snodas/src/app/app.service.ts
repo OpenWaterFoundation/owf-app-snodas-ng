@@ -163,9 +163,11 @@ export class AppService {
   /**
    * @returns An array of dates transformed into an ISO string in the format YYYY-MM-DD.
    */
-  public getDatesDashes(){
-    let dateArray = this.dates.slice(); // deep copy of the array
-    for(let date in dateArray){ // loop through and add dashed to the dates
+  public getDatesDashes() {
+    // Deep copy of the array.
+    let dateArray = this.dates.slice();
+    // Loop through and add dashes to the dates.
+    for (let date in dateArray) {
       dateArray[date] = dateArray[date].substr(0,4) + '-' + dateArray[date].substr(4,2) + '-' + dateArray[date].substr(6,2);
     }
     return dateArray;
