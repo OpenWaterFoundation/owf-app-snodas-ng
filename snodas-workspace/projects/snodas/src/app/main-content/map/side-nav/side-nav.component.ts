@@ -344,7 +344,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
     var graphEnvType = 'data';
     if (graphEnvType === 'data') {
       fullImagePath = 'https://snodas.cdss.state.co.us/data/SnowpackGraphsByBasin/' +
-      this.selectedBasinID + graphType;
+      this.selectedBasinID + graphType + '?t=' + Date.now();
     } else if (graphEnvType = 'assets') {
       fullImagePath = 'assets/SnowpackGraphsByBasin/' + this.selectedBasinID + graphType;
     }
