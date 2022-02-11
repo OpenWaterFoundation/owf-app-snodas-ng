@@ -8,6 +8,11 @@
   "datesURL": "https://snodas.cdss.state.co.us/data/SnowpackStatisticsByDate/ListOfDates.txt",
   "devEnv": false,
   "favicon": "/img/coloradoDNR.ico",
+  "refreshTime": [
+    [8, 30, 0],
+    [14, 0, 0],
+    [16, 30, 0]
+  ],
   "title": "SNODAS | Daily Snow Data",
   "version": "2.0.0 (2021-04-29)"
 }

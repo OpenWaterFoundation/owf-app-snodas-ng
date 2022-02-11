@@ -78,9 +78,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
   @ViewChild(CdkVirtualScrollViewport, { static: false }) cdkVirtualScrollViewPort: CdkVirtualScrollViewport;
   /** The current date retrieved from the parent MapComponent to be displayed in a human-readable format. */
   @Input() currentDateDisplay: string;
-  /**
-   * Array of supported quick pick date ranges. The default is no date range.
-   */
+  /** Array of supported quick pick date ranges. The default is no date range. */
   public readonly dateRangeChoice: any[] = [
     { title: '----', fillType: '', tooltip: '' },
     {
@@ -234,10 +232,11 @@ export class SideNavComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * 
-   * @param startDateInput 
-   * @param endDateInput 
-   * @param fillType 
+   * Fill in the start and end date animation form fields with the necessary date
+   * range, given the fillType.
+   * @param startDateInput The animation Start Date input field to set.
+   * @param endDateInput The animation End Date input field to set.
+   * @param fillType String that differentiates between separate date ranges.
    */
   public fillDateRange(startDateInput: any, endDateInput: any, fillType: string): void {
 

@@ -28,7 +28,6 @@
             "main": "projects/snodas/src/main.ts",
             "polyfills": "projects/snodas/src/polyfills.ts",
             "tsConfig": "projects/snodas/tsconfig.app.json",
-            "aot": true,
             "assets": [
               "projects/snodas/src/favicon.ico",
               "projects/snodas/src/assets"
@@ -46,7 +45,13 @@
               "node_modules/leaflet/dist/leaflet.js",
               "node_modules/leaflet.zoomhome/dist/leaflet.zoomhome.js",
               "node_modules/leaflet-mouse-position/src/L.Control.MousePosition.js"
-            ]
+            ],
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
@@ -76,7 +81,8 @@
                 }
               ]
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -110,19 +116,6 @@
               "projects/snodas/src/styles.css"
             ],
             "scripts": []
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "projects/snodas/tsconfig.app.json",
-              "projects/snodas/tsconfig.spec.json",
-              "projects/snodas/e2e/tsconfig.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
           }
         },
         "e2e": {

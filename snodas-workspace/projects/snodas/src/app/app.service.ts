@@ -5,7 +5,8 @@ import { HttpClient,
 import { catchError }    from 'rxjs/operators';
 import { forkJoin,
           Observable,
-          of }           from 'rxjs';
+          of,
+          timer }           from 'rxjs';
 
 
 @Injectable({
@@ -27,7 +28,7 @@ export class AppService {
   /** The text containing the markdown from the `data.md` file in assets. */
   public dataText: any;
   /** The list of dates. */
-  public dates: any;
+  public dates: string[];
   /** Variable to notify the app whether in a development (local) or production (State server) environment. */
   public devEnv: boolean;
   /** The text containing the markdown from the `documentation.md` file in assets. */
@@ -156,7 +157,7 @@ export class AppService {
   /**
    * @returns The list of dates for the map.
    */
-  public getDates(): any[] {
+  public getDates(): string[] {
     return this.dates;
   }
 
@@ -168,7 +169,7 @@ export class AppService {
     let dateArray = this.dates.slice();
     // Loop through and add dashes to the dates.
     for (let date in dateArray) {
-      dateArray[date] = dateArray[date].substr(0,4) + '-' + dateArray[date].substr(4,2) + '-' + dateArray[date].substr(6,2);
+      dateArray[date] = dateArray[date].substring(0,4) + '-' + dateArray[date].substring(4,6) + '-' + dateArray[date].substring(6);
     }
     return dateArray;
   }
@@ -265,6 +266,34 @@ export class AppService {
       catchError(this.handleError<any>(path))
     );
   }
+
+  /**
+   * Returns an Observable using the RXJS timer function using an initial offset,
+   * then the number of milliseconds to wait until it runs again.
+   * @param hours Hour of the day in military time as a number.
+   * @param minutes Minutes as a number.
+   * @param seconds Seconds as a number.
+   */
+  public refreshAt(hours: number, minutes: number, seconds: number): Observable<number> {
+    // Thanks to https://gist.github.com/ambercouch/f45889db6435299bba22ea1ee6e06d31.
+    var now = new Date();
+    var then = new Date();
+
+    if(now.getHours() > hours ||
+      (now.getHours() == hours && now.getMinutes() > minutes) ||
+      now.getHours() == hours && now.getMinutes() == minutes && now.getSeconds() >= seconds) {
+        then.setDate(now.getDate() + 1);
+    }
+    then.setHours(hours);
+    then.setMinutes(minutes);
+    then.setSeconds(seconds);
+
+    var timeout = (then.getTime() - now.getTime());
+
+    // After the initial timeout is determined, set the every remaining offset to 24 hours,
+    // i.e. wait a day before refreshing again.
+    return timer(timeout, 86400000);
+}
 
   /**
    * Read data asynchronously from a file or URL and return it as plain text.
@@ -406,7 +435,7 @@ export class AppService {
    */
   private setAsDate(date: string): Date {
     // Date creation requires the month to be a zero-based index number, hence the minus 1.
-    return new Date(parseInt(date.substr(0,4)), parseInt(date.substr(4,2)) - 1, parseInt(date.substr(6,2)));
+    return new Date(parseInt(date.substring(0,4)), parseInt(date.substring(4,2)) - 1, parseInt(date.substring(6,2)));
   }
 
   /** Sets the initial value for the Leaflet config object. */
@@ -425,10 +454,13 @@ export class AppService {
   public setMapData(): any {
     // Array to hold each Observable that needs to be subscribed to.
     var asyncData: Observable<any>[] = [];
-    console.log('Development Environment:', this.getDevEnv());
+    var infoString = 'Local Environment: ' + this.getDevEnv() + '. Retrieving dates from ';
+
     if (this.getDevEnv() === true) {
+      console.info(infoString + this.appConfig.datesLocalPath);
       asyncData.push(this.getPlainText(this.appConfig.datesLocalPath));
     } else {
+      console.info(infoString + this.appConfig.datesURL);
       asyncData.push(this.getPlainText(this.appConfig.datesURL + '?t=' + Date.now()));
     }
 

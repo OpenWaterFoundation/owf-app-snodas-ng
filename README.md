@@ -6,6 +6,7 @@ Open Water Foundation Snow Data Assimilation System (SNODAS) data viewing web ap
 * [Repository Contents](#repository-contents)
 * [Getting Started](#getting-started)
 * [Running the Application](#running-the-application)
+* [Troubleshooting](#troubleshooting)
 * [Maintainers](#maintainers)
 * [Contributors](#contributors)
 * [License](#license)
@@ -88,6 +89,38 @@ To run the application locally, such as during development:
 `ng serve --open`. 
 
 5. Use CTRL-c to kill the local server.
+
+## Troubleshooting ##
+
+### npm installing ##
+
+Dealing with npm and GitHub has not always gone smoothly. Sometimes there are isues
+when npm is looking at the wrong registry, or npm updates happen for major releases.
+This section covers some of these instances and contains fixes/help for resolving them.
+
+#### npm resets registry ####
+
+Even after using the `npm config set registry <registry-url>`, running `npm install` errors,
+and a `npm config get registry` returns a different registry. I believe the issue is an update
+to npm. The `.npmrc` file configuration has changed, so where it used to contain:
+
+```npm config
+registry=https://npm.pkg.github.com/OpenWaterFoundation
+```
+
+It is now:
+
+```npm config
+@OpenWaterFoundation:registry=https://npm.pkg.github.com
+```
+
+I think the old way of configuring the `.npmrc` files was setting the entire registry to
+the OpenWaterFoundation, so npm was trying to fetch all files from there. The error thrown
+when `npm install` failed looked like this:
+
+![npm install registry error](docs/images/npm-install-registry-error.png)
+
+Updating the `.npmrc` file resolved the issue.
 
 ## Maintainers ##
 
