@@ -1,7 +1,9 @@
 import { Component,
           OnDestroy,
           OnInit, }     from '@angular/core';
-import { Subject, Subscription } from 'rxjs';
+import { Subject,
+          Subscription,
+          timer }       from 'rxjs';
 
 import { AppService }   from '../../app.service';
 
@@ -23,21 +25,28 @@ export class MapComponent implements OnInit, OnDestroy {
   public COBoundary: any;
   /** The human readable version of the current date being displayed on the map. */
   public currentDateDisplay: string;
-  /** Subject used to send information to the side-nav Component as an event when a basin is clicked. */
+  /** Subject used to send information to the side-nav Component as an event when
+   * a basin is clicked. */
   public eventsSubject: Subject<string> = new Subject<string>();
-  /** Class variable for the Leaflet map config file subscription object so it can be closed on this component's destruction. */
-  private forkJoinSubscription$ = <any>Subscription;
+  /** The Leaflet `app-config.json` file subscription object to be unsubscribed from
+   * upon component destruction. */
+  private forkJoinSub$ = <any>Subscription;
   /** The main Leaflet map. */
   public mainMap: any;
   /** The app configuration object obtained from app-config.json. */
   public appConfig: any;
-  /** GeoJSON layer containing the merged SNODAS basin boundary geoJSON file and CSV file data of the basin by date. */
+  /** GeoJSON layer containing the merged SNODAS basin boundary geoJSON file and
+   * CSV file data of the basin by date. */
   public basinBoundaryWithData: any;
   /** Info panel on bottom left of the map. */
   public info: any;
   /** Date display on top left of the map. */
   public mapDate: any;
-  /** The object containing the SNODAS basins data from the basinBoundaries property in the map config file. */
+  /** The subscription object to hold one or all refresh subs to unsubscribe from
+   * upon component destruction. */
+  private refreshSub$ = new Subscription();
+  /** The object containing the SNODAS basins data from the basinBoundaries property
+   * in the `app-config.json` file. */
   public SNODAS_Geometry: any;
   /** Upper left zoom home map control. */
   public zoomHome: any;
@@ -91,7 +100,7 @@ export class MapComponent implements OnInit, OnDestroy {
     // displayed under Current SNODAS Date, and needed to be slowed down so it can sync up with the async map update, and the
     // animation slider.
     setTimeout(() => {
-      this.currentDateDisplay = temp.substr(0,4) + "-" + temp.substr(4,2) + "-" + temp.substr(6,2);
+      this.currentDateDisplay = temp.substring(0,4) + "-" + temp.substring(4,6) + "-" + temp.substring(6);
     }, 200);
 
     // Use Papaparse to read the CSV file
@@ -372,8 +381,8 @@ export class MapComponent implements OnInit, OnDestroy {
     };
 
     this.mapDate.update = function() {
-      this._div.innerHTML = '<h4>' + 'Map Data Date: ' + _this.appService.getCurrDate().substr(0,4) + '-' +
-      _this.appService.getCurrDate().substr(4,2) + '-' + _this.appService.getCurrDate().substr(6,2) + "</h4>";
+      this._div.innerHTML = '<h4>' + 'Map Data Date: ' + _this.appService.getCurrDate().substring(0,4) + '-' +
+      _this.appService.getCurrDate().substring(4,6) + '-' + _this.appService.getCurrDate().substring(6) + "</h4>";
     };
 
     this.mapDate.addTo(this.mainMap);
@@ -422,10 +431,22 @@ export class MapComponent implements OnInit, OnDestroy {
    * Called after the constructor, initializing input properties, and the first call to ngOnChanges.
    */
   ngOnInit(): void {
+
+    // Wait the refreshInterval, then keep waiting by the refreshInterval from then on.
+    // const delay = timer(30000, 30000);
+
+    // delay.subscribe(() => {
+    //   window.location.reload();
+    // });
+    
     // Set the pre-initialized appConfig JSON object to appConfig.
     this.appConfig = this.appService.getAppConfig();
 
-    this.forkJoinSubscription$ = this.appService.setMapData().subscribe((results: any) => {
+    if (this.appConfig.refreshTime) {
+      this.setMapRefreshTime();
+    }
+
+    this.forkJoinSub$ = this.appService.setMapData().subscribe((results: any) => {
       // Results are as follows:
       // results[0] - setDates: The plain text file list of dates from assets/ or the state server URL.
       // results[1] - basinBoundaries: The geoJSON file for the SNODAS boundaries (basins) in Colorado.
@@ -461,7 +482,29 @@ export class MapComponent implements OnInit, OnDestroy {
    * Called once, before the instance is destroyed.
    */
   ngOnDestroy(): void {
-    this.forkJoinSubscription$.unsubscribe();
+    this.forkJoinSub$.unsubscribe();
+    this.refreshSub$.unsubscribe();
+  }
+
+  /**
+   * Sets one or more times throughout the day to refresh the SNODAS page, as if
+   * the user clicked the refresh button.
+   */
+  private setMapRefreshTime(): void {
+    // Iterate over each time array given to the refreshTime app-config property.
+    for (let timeArr of this.appConfig.refreshTime) {
+      //         timeArr structure
+      // timeArr[0], timeArr[1], timeArr[2]
+      //       refreshTime structure
+      // [    8    ,      0    ,     0     ]          Refresh map at 8:00am
+      // [   13    ,     30    ,     0     ]          Refresh map at 1:30pm
+      const delay = this.appService.refreshAt(timeArr[0], timeArr[1], timeArr[2]);
+      // Add each subscription to the refreshSub$ so all can be unsubscribed on
+      // component destruction.
+      this.refreshSub$.add(delay.subscribe(() => {
+        window.location.reload();
+      }));
+    }
   }
 
   /* This function is used for the CO_boundary style. It sets the weight of the line used
@@ -479,18 +522,26 @@ export class MapComponent implements OnInit, OnDestroy {
   and update it's innerHTML value to equal the current date in the format
   YYYY-MM-DD. */
   // public showValue(newValue) {
-  //   document.getElementById("range").innerHTML = newValue.substr(0,4) + "-" + newValue.substr(4,2) + "-" + newValue.substr(6,2);
+  //   document.getElementById("range").innerHTML = newValue.substring(0,4) + "-" + newValue.substring(4,6) + "-" + newValue.substring(6);
   //   this.buildMap(newValue, 'none', true);
   // }
 
-  /* Changes which basin is currently highlighted on the map */
-  public updateBasin(basin: string) {
+  /**
+   * Changes which basin is currently highlighted on the map.
+   * @param basin 
+   */
+  public updateBasin(basin: string): void {
     this.buildMap(this.appService.getCurrDate(), basin, true);
   }
 
-  /* Called to update the date of the data the map is displaying */
-  public updateMapDate(date: string) {
-    date = date.substr(0,4) + date.substr(5,2) + date.substr(8,2);
+  /**
+   * Deconstruct the hyphenated date format (xxxx-xx-xx) into a `ListOfDates.txt`
+   * format (xxxxxxxx). Called when selecting a new date from the date
+   * dropdown.
+   * @param date The hyphenated date string from the Date dropdown list.
+   */
+  public updateMapDate(date: string): void {
+    date = date.substring(0,4) + date.substring(5,7) + date.substring(8);
     this.buildMap(date, 'none', true);
   }
 

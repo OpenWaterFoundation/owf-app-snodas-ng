@@ -12,11 +12,12 @@ import { ScrollingModule }         from '@angular/cdk/scrolling';
 
 import { MatButtonModule }         from '@angular/material/button';
 import { MatDatepickerModule }     from '@angular/material/datepicker';
+import { MatDialogModule }         from '@angular/material/dialog';
 import { MatExpansionModule }      from '@angular/material/expansion';
 import { MatFormFieldModule }      from '@angular/material/form-field';
 import { MatInputModule }          from '@angular/material/input';
 import { DateAdapter,
-  ErrorStateMatcher,
+          ErrorStateMatcher,
           MatNativeDateModule, 
           MAT_DATE_FORMATS}        from '@angular/material/core';
 import { MatSelectModule }         from '@angular/material/select';
@@ -27,6 +28,7 @@ import { MatTooltipModule }        from '@angular/material/tooltip';
 
 import { ShowdownModule }          from 'ngx-showdown';
 import * as Showdown               from 'showdown';
+import { CookieModule }            from 'ngx-cookie';
 
 import { AppRoutingModule }        from './app-routing.module';
 import { AppService }              from './app.service';
@@ -97,9 +99,11 @@ const convert = new Showdown.Converter({
     BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
+    CookieModule.forRoot(),
     HttpClientModule,
     MatButtonModule,
     MatDatepickerModule,
+    MatDialogModule,
     MatExpansionModule,
     MatFormFieldModule,
     MatInputModule,
