@@ -86,7 +86,7 @@ hand corner of the Dialog do not appear to the user. */
 
 /* Used for styling a Leaflet DomUtil created element. */
 .mapDate h4 {
-  margin: 0 0 5px;
+  margin: 0px;
   color: #777;
   font-size: 28px;
   font-weight: 400;
@@ -95,6 +95,12 @@ hand corner of the Dialog do not appear to the user. */
 /* Styling for the padding inside of a Material expanded body, after a click. */
 .mat-expansion-panel-content > .mat-expansion-panel-body {
   padding: 0px 2.5% 16px;
+}
+
+/* Allows all MatTooltip's text lines throughout the application to be broken at newline characters, at <br>,
+as as necessary to fill line boxes. */
+.mat-tooltip {
+  white-space: pre-line;
 }
 
 /* ID's */

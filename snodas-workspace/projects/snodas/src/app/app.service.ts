@@ -6,7 +6,7 @@ import { catchError }    from 'rxjs/operators';
 import { forkJoin,
           Observable,
           of,
-          timer }           from 'rxjs';
+          timer }        from 'rxjs';
 
 
 @Injectable({

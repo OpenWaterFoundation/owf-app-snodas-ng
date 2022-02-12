@@ -28,6 +28,7 @@ button#navbar-button {
   right: 0;
   height: 70px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   color: black;
 }

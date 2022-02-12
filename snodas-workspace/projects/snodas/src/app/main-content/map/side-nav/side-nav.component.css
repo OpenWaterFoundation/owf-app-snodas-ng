@@ -56,7 +56,9 @@ div.mat-form-field-wrapper {
 
 /* Styling for the side-nav top-level div */
 div#main {
-  /* color: white; Changes most of the text color in the side nav to white. Excludes buttons, mat-select, etc. */ 
+  /* color: white; Changes most of the text color in the side nav to white. Excludes buttons, mat-select, etc. */
+  height: 100%;
+  position: relative;
   text-align: center;
   padding: 10px;
 }
@@ -148,6 +150,10 @@ span#snodas-date {
   color: #9DB66B !important;
 }
 
+.fa-clock-o {
+  margin-left: 10px;
+}
+
 /* Styles the font size of the SNODAS animation date picker placeholder input field. This is so the placeholder `YYYY-MM-DD`
 can be shown in its entirety without being cut off. ::placeholder is a pseudo element (or class), with more info about them at
 https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-elements*/
@@ -166,6 +172,11 @@ input.start-date-input::placeholder {
   white-space: pre-wrap;
   line-height: 1;
   text-align: center
+}
+
+#date-and-clock {
+  display: flex;
+  justify-content: center;
 }
 
 #date-picker-form {

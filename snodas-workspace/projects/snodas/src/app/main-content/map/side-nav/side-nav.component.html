@@ -23,7 +23,14 @@
     </mat-select>
   </mat-form-field>
 
-  <h5><u>Selected SNODAS Date</u></h5>
+  <div id="date-and-clock">
+    <h5><u>Selected SNODAS Date</u></h5>
+    <i class="fa fa-clock-o"
+        aria-hidden="true"
+        [matTooltip]="refreshTooltip"
+        matTooltipPosition="left"></i>
+  </div>
+  
   <span id="selected-date-display">{{currentDateDisplay}}</span>
 
   <hr id="divider"><!-- Divider between the SNODAS animation Form Field and Select Basin Form Field dropdown. -->
@@ -217,9 +224,9 @@
       </button>
       <button mat-raised-button
               id="animation-button"
-              (click)="restartAnimation()"
+              (click)="resetAnimation()"
               [disabled]="animationPaused | menuDisable : 'restart' : animationCompleted"
-              matTooltip="Restart animation"
+              matTooltip="Reset animation"
               [matTooltipShowDelay]="750"
               matTooltipPosition="above">
         <i class="fa fa-fast-backward" aria-hidden="true"></i>
@@ -228,6 +235,7 @@
     </mat-expansion-panel>
   </mat-accordion>
 
+  
   
 </div>
 
