@@ -569,35 +569,71 @@ export class SideNavComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * 
+   * Performs logic to determine and display the last available date SNODAS currently
+   * contains, the last refresh of the page, the next refresh to take place, and
+   * displays them in a tooltip.
    * @returns A string containing the text to be displayed on the font awesome clock
    * icon tooltip. Describes the refresh state of the page.
    */
-  public setRefreshTooltip(): string {
+  private setRefreshTooltip(): string {
 
-    let lastDate = this.allDates[0];
-    let lastRefresh = moment().format("YYYY-MM-DD HH:mm:ss");
+    // Most recent day from the ListOfDates.txt file, in hyphenated form.
+    let lastDate: string = this.allDates[0];
+    // The moment the page was refreshed.
+    let lastRefresh: string = moment().format("YYYY-MM-DD HH:mm:ss");
+    // Boolean representing whether the last array from the app-config refreshTime
+    // array has been checked. Used to rollover the day for next refresh.
+    var lastIndexChecked = false;
+    // The index of the array in the refreshTime array of the next refresh. Used
+    // in case the times are not in order.
     var nextRefreshIndex = 0;
+    // Used to find the shortest time between the desired refresh time and now.
+    // Also used in case the times are not in order.
     var soonestTime = Infinity;
+    // The refreshTime array of arrays from the app-config.json file.
+    var configRefreshTime: number[][] = this.appService.appConfig.refreshTime;
+    // String representing when the next page refresh will occur, in the format
+    // YYYY-MM-DD HH:mm:ss.
+    var nextRefresh: string; 
 
-    for (var [i, time] of this.appService.appConfig.refreshTime.entries()) {
+    for (var [i, time] of configRefreshTime.entries()) {
+      // Determine if all dates in the refreshTime array have been checked.
+      if (i === configRefreshTime.length - 1) {
+        lastIndexChecked = true;
+      }
+      // Create the next time the refresh is to occur.
       var nextTime = new Date();
       nextTime.setHours(time[0]);
       nextTime.setMinutes(time[1]);
       nextTime.setSeconds(time[2]);
-
+      // Find the remaining milliseconds remaining until refresh.
       var millisTillRefresh = nextTime.getTime() - new Date().getTime();
-      console.log(millisTillRefresh);
+      // If the amount of milliseconds is positive, the refresh hasn't happened
+      // yet, and if they are less than the previously found upcoming refresh (initially
+      // set to infinity), then this time has become the most recent upcoming refresh.
       if (millisTillRefresh > 0 && millisTillRefresh < soonestTime) {
         soonestTime = millisTillRefresh;
         nextRefreshIndex = i;
       }
     }
-    console.log(this.appService.appConfig.refreshTime[nextRefreshIndex]);
+    // Create an object to feed to the moment constructor with the next refresh
+    // time array info.
+    var momentObj: moment.MomentInput = {
+      hour: configRefreshTime[nextRefreshIndex][0],
+      minute: configRefreshTime[nextRefreshIndex][1],
+      seconds: configRefreshTime[nextRefreshIndex][2]
+    }
+    // If the last array in the refreshTime array has been checked, then the next
+    // refresh will be the following day. Add 1 day to the created moment.
+    if (nextRefreshIndex === 0 && lastIndexChecked === true) {
+      nextRefresh = moment(momentObj).add(1, 'day').format("YYYY-MM-DD HH:mm:ss");
+    } else {
+      nextRefresh = moment(momentObj).format("YYYY-MM-DD HH:mm:ss");
+    }
 
     return "LAST DATE AVAILABLE: " + lastDate + "\n" +
     "LAST REFRESH: " + lastRefresh + "\n" +
-    "NEXT REFRESH: ";
+    "NEXT REFRESH: " + nextRefresh;
   }
 
   /**
