@@ -102,8 +102,8 @@ export class SideNavComponent implements OnInit, OnDestroy {
     badDate: 'Invalid Date',
     required: 'Required'
   }
-  /** Subscription to an event using data binding in the Map Component (parent)
-   * template file. Receives the Local_Id as an event when a basin is clicked on. */
+  /** An event using data binding in the Map Component (parent) template file.
+   * Receives the Local_Id as an event when a basin is clicked on. */
   @Input() events: Observable<void>;
   /** Variable representing the subscription to the Input() events above. Used to
    * easily unsubscribe when this component is destroyed. */
@@ -171,11 +171,12 @@ export class SideNavComponent implements OnInit, OnDestroy {
    * @param fullBasinName The basin name and id in a string, e.g. BASIN NAME (BasinID)
    */
   public callUpdateBasin(fullBasinName: string): void {
-    // Enable graph buttons
+    // Enable graph buttons.
     this.isBasinSelected = true;
     this.selectedBasinID = fullBasinName.slice(fullBasinName.indexOf('(') + 1, fullBasinName.indexOf(')'));
     this.selectedBasinName = this.getBasinName(this.selectedBasinID);
-    this.updateBasinFunction.emit(fullBasinName);
+    // Emits an event with the selected basin's ID back to the Map Component.
+    this.updateBasinFunction.emit(this.selectedBasinID);
   }
 
   /**
@@ -298,12 +299,12 @@ export class SideNavComponent implements OnInit, OnDestroy {
   /**
    * Takes in a basin id and searches through SNODAS_Geometry object to find the
    * local name of the basin.
-   * @param id The basin ID
+   * @param id The basin ID.
    * @returns The basin name as a string.
    */
   private getBasinName(id: any) {
-    for(let index in this.SNODAS_Geometry.features) {
-      if(this.SNODAS_Geometry.features[index]["properties"]["LOCAL_ID"] == id) {
+    for (let index in this.SNODAS_Geometry.features) {
+      if (this.SNODAS_Geometry.features[index]["properties"]["LOCAL_ID"] === id) {
           return this.SNODAS_Geometry.features[index]["properties"]["LOCAL_NAME"];
       }
     }
@@ -321,6 +322,8 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     this.refreshTooltip = this.setRefreshTooltip();
 
+    // Subscribe to the event observable so that when a basin is clicked and handled
+    // on the Map Component, this will update with the basin's ID.
     this.eventsSubscription$ = this.events.subscribe((basinID: any) => {
       this.isBasinSelected = true;
       this.selectedBasinID = basinID;
@@ -623,8 +626,9 @@ export class SideNavComponent implements OnInit, OnDestroy {
       minute: configRefreshTime[nextRefreshIndex][1],
       seconds: configRefreshTime[nextRefreshIndex][2]
     }
-    // If the last array in the refreshTime array has been checked, then the next
-    // refresh will be the following day. Add 1 day to the created moment.
+    // If the last array in the refreshTime array has been checked, and the next
+    // has been determined to be the first array, then the next refresh will
+    // be the following day. Add 1 day to the created moment.
     if (nextRefreshIndex === 0 && lastIndexChecked === true) {
       nextRefresh = moment(momentObj).add(1, 'day').format("YYYY-MM-DD HH:mm:ss");
     } else {

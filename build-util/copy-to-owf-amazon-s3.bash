@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 (set -o igncr) 2>/dev/null && set -o igncr; # this comment is required
 # The above line ensures that the script can be run on Cygwin/Linux even with Windows CRNL
 #
@@ -46,7 +46,7 @@ buildDist() {
   logInfo ""
   logInfo "Regenerating Angular dist folder to deploy the website..."
   logInfo "Changing to:  ${snodasProjectFolder}"
-  cd ${snodasProjectFolder}
+  cd "${snodasProjectFolder}" || exit
 
   optimizationArg=""
   if [ "${doOptimization}" = "no" ]; then
@@ -62,8 +62,8 @@ buildDist() {
     # Angular < 11 needs but >= deals with it automatically.
     extractCss="--extractCss=true"
   fi
-  logInfo "Start running:  ng build --prod=true --aot=true --baseHref=${ngBuildHrefOpt} ${extractCss} --namedChunks=false --outputHashing=all --output-path=${snodasDistFolder} --sourceMap=false ${optimizationArg}"
-  ng build --prod=true --aot=true --baseHref=${ngBuildHrefOpt} ${extractCss} --namedChunks=false --outputHashing=all --output-path=${snodasDistFolder} --sourceMap=false ${optimizationArg}
+  logInfo "Start running:  ng build --configuration production --aot=true --baseHref=${ngBuildHrefOpt} ${extractCss} --namedChunks=false --outputHashing=all --output-path=${snodasDistFolder} --sourceMap=false ${optimizationArg}"
+  ng build --configuration production --aot=true --baseHref=${ngBuildHrefOpt} ${extractCss} --namedChunks=false --outputHashing=all --output-path="${snodasDistFolder}" --sourceMap=false ${optimizationArg}
   exitCode=$?
   logInfo "...done running 'ng build... (exit code ${exitCode})'"
   if [ "${exitCode}" -ne 0 ]; then
@@ -80,25 +80,25 @@ buildDist() {
     #   Problem:   https://github.com/angular/angular/issues/30835
     #   Solution:  https://stackoverflow.com/questions/56606789/angular-8-ng-build-throwing-mime-error-with-cordova
     # Replace "module" with "text/javascript" so that Amazon S3 works.
-    sed -i 's/type="module"/type="text\/javascript"/g' ${indexFile}
+    sed -i 's/type="module"/type="text\/javascript"/g' "${indexFile}"
     # Additionally need to insert "defer" at the end of the main-es2015*.js item so it looks like:
     #   <script src="main-es2015.afb0c8c9a69f82c651a0.js" type="text/javascript" defer>
-    sed -i 's/main-es2015.*" type="text\/javascript"/& defer/' ${indexFile}
+    sed -i 's/main-es2015.*" type="text\/javascript"/& defer/' "${indexFile}"
 
     # Update the index.html to replace '${Google_Analytics_Tracking_id}' with the
     # application configuration '${googleAnalyticsTrackingId}' property.
     # The different property name is used in order to isolate the replacement.
     if [ -f "${appConfigFile}" ]; then
       logDebug "Checking application file:  ${appConfigFile}"
-      googleAnalyticsTrackingId=$(grep '"googleAnalyticsTrackingId"' ${appConfigFile} | cut -d ":" -f 2 | tr -d '"' | tr -d ' ' | tr -d ',')
+      googleAnalyticsTrackingId=$(grep '"googleAnalyticsTrackingId"' "${appConfigFile}" | cut -d ":" -f 2 | tr -d '"' | tr -d ' ' | tr -d ',')
       logDebug "Google Analytics using tracking ID from application configuration:  ${googleAnalyticsTrackingId}"
       if [ -n "${googleAnalyticsTrackingId}" ]; then
         # Replace the Google Analytics tracking ID in the index.html file
         logInfo "Configuring Google Analytics using tracking ID:  ${googleAnalyticsTrackingId}"
-        sed -i "s/id=\${Google_Analytics_Tracking_Id}/id=${googleAnalyticsTrackingId}/" ${indexFile}
+        sed -i "s/id=\${Google_Analytics_Tracking_Id}/id=${googleAnalyticsTrackingId}/" "${indexFile}"
       else
-        logError "googleAnalyticsTrackingId application configuration property is not set."
-        logError "Not configuring Google Analytics."
+        logWarning "googleAnalyticsTrackingId application configuration property is not set."
+        logWarning "Not configuring Google Analytics."
       fi
     fi
   else
@@ -112,7 +112,7 @@ buildDist() {
   cleanScript="${snodasRepoFolder}/build-util/clean-dist-for-deployment.sh"
   if [ -f "${cleanScript}" ]; then
     echo "Running script to remove unnecessary files: ${cleanScript}"
-    ${snodasRepoFolder}/build-util/clean-dist-for-deployment.sh
+    "${snodasRepoFolder}"/build-util/clean-dist-for-deployment.sh
     exitCode=$?
     if [ ${exitCode} -ne 0 ]; then
       logError "Error cleaning 'dist/' for deployment."
@@ -126,14 +126,14 @@ buildDist() {
 # - set ${angularVersion} and ${angularVersionMajor} for use in configuring the command line,
 #   helps with compatibility
 checkAngularVersion() {
-  logWarning "Checking Angular version."
+  logInfo "Checking Angular version."
   # Run in the project folder to make sure project Angular version is found,
   # not global Angular version.
-  cd ${snodasProjectFolder}
+  cd "${snodasProjectFolder}" || exit
   angularVersion=$(ng --version | grep -i "Angular CLI" | cut -d ':' -f 2 | tr -d ' ')
-  angularVersionMajor=$(echo ${angularVersion} | cut -d '.' -f 1)
-  echo "angularVersion=${angularVersion}"
-  echo "angularVersionMajor=${angularVersionMajor}"
+  angularVersionMajor=$(echo "${angularVersion}" | cut -d '.' -f 1)
+  logInfo "angularVersion=${angularVersion}"
+  logInfo "angularVersionMajor=${angularVersionMajor}"
 }
 
 # Check input
@@ -151,12 +151,12 @@ checkInput() {
 # Determine the operating system that is running the script
 # - mainly care whether Cygwin or MINGW (Git Bash)
 checkOperatingSystem() {
-  if [ ! -z "${operatingSystem}" ]; then
+  if [ -n "${operatingSystem}" ]; then
     # Have already checked operating system so return
     return
   fi
   operatingSystem="unknown"
-  os=$(uname | tr [a-z] [A-Z])
+  os=$(uname | tr "[:lower:]" "[:upper:]")
   case "${os}" in
     CYGWIN*)
       operatingSystem="cygwin"
@@ -183,7 +183,7 @@ echoStderr() {
 # - See: https://unix.stackexchange.com/questions/76354/who-sets-user-and-username-environment-variables
 getUserLogin() {
   if [ -z "${USER}" ]; then
-    if [ ! -z "${LOGNAME}" ]; then
+    if [ -n "${LOGNAME}" ]; then
       USER=${LOGNAME}
     fi
   fi
@@ -205,27 +205,27 @@ getVersion() {
   # SNODAS config file
   # - TODO smalers 2021-04-28 may do something similar for SNODAS
   # - get the first match because for some reason the file may have redundant content
-  appVersion=$(grep -m 1 '"version"' ${appConfigFile} | cut -d ":" -f 2 | cut -d "(" -f 1 | tr -d ' ' | tr -d '"')
+  appVersion=$(grep -m 1 '"version"' "${appConfigFile}" | cut -d ":" -f 2 | cut -d "(" -f 1 | tr -d ' ' | tr -d '"')
 }
 
 # Print a DEBUG message, currently prints to stderr.
 logDebug() {
-   echoStderr "[DEBUG] $@"
+   echoStderr "[DEBUG] $*"
 }
 
 # Print an ERROR message, currently prints to stderr.
 logError() {
-   echoStderr "[ERROR] $@"
+   echoStderr "[ERROR] $*"
 }
 
 # Print an INFO message, currently prints to stderr.
 logInfo() {
-   echoStderr "[INFO] $@"
+   echoStderr "[INFO] $*"
 }
 
 # Print an WARNING message, currently prints to stderr.
 logWarning() {
-   echoStderr "[WARNING] $@"
+   echoStderr "[WARNING] $*"
 }
 
 # Parse the command parameters
@@ -323,12 +323,12 @@ printUsage() {
   echoStderr ""
   echoStderr "--aws-profile=profile   Specify the Amazon profile to use for AWS credentials."
   echoStderr "--dryrun                Do a dryrun but don't actually upload anything."
-  echoStderr "-h or --help            Print the usage."
+  echoStderr "-h, --help              Print the usage."
   echoStderr "--nobuild               Do not run 'ng build...' to create the 'dist' folder contents, useful for testing."
   echoStderr "--noupload              Do not upload the staging area 'dist' folder contents, useful for testing."
   echoStderr "--nooptimization        Set --optimization=false for 'ng build' useful for troubleshooting."
   echoStderr "--upload-assets         Only upload (sync) the 'assets' folder."
-  echoStderr "-v or --version         Print the version and copyright/license notice."
+  echoStderr "-v, --version           Print the version and copyright/license notice."
   echoStderr ""
 }
 
@@ -339,7 +339,7 @@ printVersion() {
   echoStderr "${programName} version ${programVersion} ${programVersionDate}"
   echoStderr ""
   echoStderr "SNODAS Tools"
-  echoStderr "Copyright 2017-2021 Open Water Foundation."
+  echoStderr "Copyright 2017-2022 Open Water Foundation."
   echoStderr ""
   echoStderr "License GPLv3+:  GNU GPL version 3 or later"
   echoStderr ""
@@ -357,9 +357,10 @@ syncFiles() {
 
   s3FolderUrl=$1
 
-  if [ "${operatingSystem}" = "cygwin" -o "${operatingSystem}" = "linux" ]; then
+  if [ "${operatingSystem}" = "cygwin" ] || [ "${operatingSystem}" = "linux" ]; then
     # aws is in a standard location such as /usr/bin/aws
-    aws s3 sync ${snodasDistAppFolder} ${s3FolderUrl} ${dryrun} --delete --profile "${awsProfile}"
+    logInfo "Running aws s3 sync ${snodasDistAppFolder} ${s3FolderUrl} ${dryrun} --delete --profile ${awsProfile}"
+    aws s3 sync "${snodasDistAppFolder}" "${s3FolderUrl}" "${dryrun}" --delete --profile "${awsProfile}"
     errorCode=$?
     if [ ${errorCode} -ne 0 ]; then
       logError "Error code ${errorCode} from 'aws' command.  Exiting."
@@ -372,7 +373,7 @@ syncFiles() {
     # - TODO smalers 2019-01-04 could try to find where py thinks Python is installed but not sure how
     awsScript="${HOME}/AppData/Local/Programs/Python/Python37/scripts/aws"
     if [ -f "${awsScript}" ]; then
-      ${awsScript} s3 sync ${snodasDistAppFolder} ${s3FolderUrl} ${dryrun} --delete --profile "${awsProfile}"
+      ${awsScript} s3 sync "${snodasDistAppFolder}" "${s3FolderUrl}" "${dryrun}" --delete --profile "${awsProfile}"
       errorCode=$?
       if [ ${errorCode} -ne 0 ]; then
         logError "Error code ${errorCode} from 'aws' command.  Exiting."
@@ -393,7 +394,7 @@ syncFiles() {
 # Upload the staging area 'dist' files to S3.
 uploadDist() {
   logInfo "Changing to:  ${scriptFolder}"
-  cd ${scriptFolder}
+  cd "${scriptFolder}" || exit
 
   if [ ! -d "${snodasDistAppFolder}" ]; then
     logError ""
@@ -407,12 +408,14 @@ uploadDist() {
 
   # Add an upload log file to the dist, useful to know who did an upload.
   uploadLogFile="${snodasDistAppFolder}/upload.log.txt"
-  echo "UploadUser = ${USER}" > ${uploadLogFile}
   now=$(date "+%Y-%m-%d %H:%M:%S %z")
-  echo "UploadTime = ${now}" >> ${uploadLogFile}
-  echo "UploaderName = ${programName}" >> ${uploadLogFile}
-  echo "UploaderVersion = ${programVersion} ${programVersionDate}" >> ${uploadLogFile}
-  echo "AppVersion = ${appVersion}" >> ${uploadLogFile}
+  {
+    echo "UploadUser = ${USER}"
+    echo "UploadTime = ${now}";
+    echo "UploaderName = ${programName}";
+    echo "UploaderVersion = ${programVersion} ${programVersionDate}";
+    echo "AppVersion = ${appVersion}";
+  } >> "${uploadLogFile}"
 
   if [ "${uploadOnlyAssets}" = "yes" ]; then
     # Only updating assets
@@ -428,12 +431,12 @@ uploadDist() {
   echo "  from: ${snodasDistAppFolder}"
   echo "    to: ${s3FolderVersionUrl}"
   echo "Uploading application ${appVersion} version."
-  read -p "Continue [Y/n/q] (if 'n', will still be able to upload 'latest')? " answer
-  if [ "${answer}" = "q" -o "${answer}" = "Q" ]; then
+  read -r -p "Continue [Y/n/q] (if 'n', will still be able to upload 'latest')? " answer
+  if [ "${answer}" = "q" ] || [ "${answer}" = "Q" ]; then
     exit 0
-  elif [ -z "${answer}" -o "${answer}" = "y" -o "${answer}" = "Y" ]; then
+  elif [ -z "${answer}" ] || [ "${answer}" = "y" ] || [ "${answer}" = "Y" ]; then
     logInfo "Starting aws sync of ${appVersion} copy..."
-    syncFiles ${s3FolderVersionUrl}
+    syncFiles "${s3FolderVersionUrl}"
     logInfo "...done with aws sync of ${appVersion} copy."
   fi
 
@@ -442,36 +445,36 @@ uploadDist() {
   echo "Uploading Angular 'latest' version"
   echo "  from: ${snodasDistAppFolder}"
   echo "    to: ${s3FolderLatestUrl}"
-  read -p "Continue [Y/n/q]? " answer
-  if [ "${answer}" = "q" -o "${answer}" = "Q" ]; then
+  read -r -p "Continue [Y/n/q]? " answer
+  if [ "${answer}" = "q" ] || [ "${answer}" = "Q" ]; then
     exit 0
-  elif [ -z "${answer}" -o "${answer}" = "y" -o "${answer}" = "Y" ]; then
+  elif [ -z "${answer}" ] || [ "${answer}" = "y" ] || [ "${answer}" = "Y" ]; then
     logInfo "Starting aws sync of 'latest' copy..."
-    syncFiles ${s3FolderLatestUrl}
+    syncFiles "${s3FolderLatestUrl}"
     logInfo "...done with aws sync of 'latest' copy."
   fi
 }
 
-# Entry point into the script
+# Entry point into the script.
 
-# Get the folder where this script is located since it may have been run from any folder
-scriptFolder=$(cd $(dirname "$0") && pwd)
-repoFolder=$(dirname ${scriptFolder})
-gitReposFolder=$(dirname ${repoFolder})
+# Get the folder where this script is located since it may have been run from any folder.
+scriptFolder=$(cd "$(dirname "$0")" && pwd)
+repoFolder=$(dirname "${scriptFolder}")
+gitReposFolder=$(dirname "${repoFolder}")
 # Start must be consistent with SNODAS tools software...
 snodasRepoFolder="${gitReposFolder}/owf-app-snodas-ng"
 snodasProjectFolder="${snodasRepoFolder}/snodas-workspace/projects/snodas"
 # Put 'dist' under the project folder, in case other projects have a distribution (general convention).
-snodasDistFolder="${snodasProjectFolder}/dist"
+snodasDistFolder="${snodasRepoFolder}/snodas-workspace/dist"
 # Application folder is the same as the 'dist' folder.
-snodasDistAppFolder="${snodasDistFolder}"
+snodasDistAppFolder="${snodasDistFolder}/snodas"
 # Application configuration file used to extract application version and Google Analytics tracking ID.
 # - TODO smalers 2021-04-29 need to implement application configuration file
 appConfigFile="${snodasProjectFolder}/src/assets/app-config.json"
 # ...end must match SNODAS tools software
-programName=$(basename $0)
-programVersion="1.2.0"
-programVersionDate="2021-05-02"
+programName=$(basename "$0")
+programVersion="1.3.0"
+programVersionDate="2022-02-15"
 logInfo "scriptFolder:         ${scriptFolder}"
 logInfo "programName:          ${programName}"
 logInfo "repoFolder:           ${repoFolder}"
@@ -496,7 +499,7 @@ getUserLogin
 # - put before parseCommandLine so can be used in print usage, etc.
 # - TODO smalers 2020-04-20 does this need an app folder at end like "/owf-app-poudre-dashboard"?
 getVersion
-logInfo "Application version:  ${appVersion}"
+logInfo "Application version: ${appVersion}"
 s3FolderVersionUrl="s3://snodas.openwaterfoundation.org/${appVersion}"
 s3FolderLatestUrl="s3://snodas.openwaterfoundation.org/latest"
 

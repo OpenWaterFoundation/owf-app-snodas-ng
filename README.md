@@ -94,7 +94,7 @@ To run the application locally, such as during development:
 
 ### npm installing ##
 
-Dealing with npm and GitHub has not always gone smoothly. Sometimes there are isues
+Dealing with npm and GitHub has not always gone smoothly. Sometimes there are issues
 when npm is looking at the wrong registry, or npm updates happen for major releases.
 This section covers some of these instances and contains fixes/help for resolving them.
 

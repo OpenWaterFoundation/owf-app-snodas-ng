@@ -13,7 +13,7 @@ buildDist() {
   fi
 
   logInfo "Building the SNODAS application..."
-  ng build --prod=true --aot=true --baseHref=${ngBuildHrefOpt} --namedChunks=false --outputHashing=all --sourceMap=false ${optimizationArg}
+  ng build --configuration production --aot=true --baseHref=${ngBuildHrefOpt} --namedChunks=false --outputHashing=all --sourceMap=false ${optimizationArg}
   logInfo "Done building."
 }
 
@@ -193,7 +193,7 @@ printVersion() {
   echoStderr "${programName} version ${programVersion} ${programVersionDate}"
   echoStderr ""
   echoStderr "Angular SNODAS"
-  echoStderr "Copyright 2017-2021 Open Water Foundation."
+  echoStderr "Copyright 2017-2022 Open Water Foundation."
   echoStderr ""
   echoStderr "License GPLv3+:  GNU GPL version 3 or later"
   echoStderr ""

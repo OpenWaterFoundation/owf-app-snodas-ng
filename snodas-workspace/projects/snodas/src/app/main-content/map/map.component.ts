@@ -1,15 +1,14 @@
 import { Component,
           OnDestroy,
-          OnInit, }     from '@angular/core';
+          OnInit, }      from '@angular/core';
 import { Subject,
-          Subscription,
-          timer }       from 'rxjs';
+          Subscription } from 'rxjs';
 
-import { AppService }   from '../../app.service';
+import { CookieService } from 'ngx-cookie';
+import { AppService }    from '../../app.service';
 
-import * as Papa        from 'papaparse';
+import * as Papa         from 'papaparse';
 
-// import * as L         from 'leaflet';
 declare var L: any;
 
 
@@ -56,18 +55,19 @@ export class MapComponent implements OnInit, OnDestroy {
    * @constructor Injects this component with the app service for network requests and global data.
    * @param appService The reference to the application service for retrieving data over the network and holding global data.
    */
-  constructor(private appService: AppService) {
+  constructor(private appService: AppService,
+              private cookieService: CookieService) {
 
   }
 
 
   /**
-   * 
+   * Builds the dynamic part of the SNODAS map. Reads in and merges data into Leaflet
+   * objects and sets up event handlers for the map.
    * @param currDate The current date displayed on the map.
    * @param basin 
-   * @param defined 
    */
-  private buildMap(currDate: any, basin: any, defined: boolean): void {
+  private buildMap(currDate: any, basinID?: any): void {
 
     var _this = this;
     // Set the current date in the app service. This could be the same date if for example, a basin is selected.
@@ -124,7 +124,7 @@ export class MapComponent implements OnInit, OnDestroy {
         }).addTo(this.mainMap);
 
         // SelectBasinCall is set to true when the ClickOnMapItem function is called.
-        var selectBasinCall = false;
+        // var selectBasinCall = false;
 
         /**
          * Takes in a SNODAS Geometry geoJSON array and an array populated from the SnowpackStatisticsByDate/YYYYMMDD CSV file
@@ -174,7 +174,7 @@ export class MapComponent implements OnInit, OnDestroy {
          * @param e The Event object from Leaflet.
          */
         function highlightFeature(e: any) {
-          selectBasinCall = false;
+          // selectBasinCall = false;
           var layer = e.target;
           layer.setStyle({
             weight: 6,
@@ -189,8 +189,6 @@ export class MapComponent implements OnInit, OnDestroy {
           _this.info.update(layer.feature.properties);
         }
 
-        
-
         /**
          * Called by onEachFeature. It is used once a basin has been highlighted, then the user moves the mouse it will
          * reset the layer back to the original state.
@@ -201,18 +199,18 @@ export class MapComponent implements OnInit, OnDestroy {
           {
             _this.basinBoundaryWithData.resetStyle(e.target);
             _this.info.update();
-            if(selectBasinCall === true)
-            {
-              var layer = _this.basinBoundaryWithData.getLayer(e.target.feature.properties.LOCAL_ID);
-              layer.fireEvent('mouseover');
-              selectBasinCall = false;
-            }
+            // if(selectBasinCall === true)
+            // {
+            //   var layer = _this.basinBoundaryWithData.getLayer(e.target.feature.properties.LOCAL_ID);
+            //   layer.fireEvent('mouseover');
+            //   selectBasinCall = false;
+            // }
           }
         }
 
         /**
-         * Called by onEachFeature. Used if user clicks on a basin. Once a basin is selected, the proper SWE graphs
-         * will be accessible to view.
+         * Used if user clicks on a basin from the map, as opposed to when a basin
+         * is chosen from the Select Basin dropdown.
          * @param e The Event object from Leaflet.
          */
         function selectBasin(e: any) {
@@ -234,37 +232,47 @@ export class MapComponent implements OnInit, OnDestroy {
           };
         }
 
-        /* This function is used to imitate the fire event 'mouseover'.
-        It is called when a user selects a basin from the 'Select Basin' button.
-        Once a basin is selected this function will imitate a user moving the
-        cursor over a basin. This function takes in a LOCAL_ID and will highlight
-        the currently selected basin. */
-        var basinSelected = false;     /* basin_selected is a boolean value. This is set true when the ClickOnMapItem function is called.
-        This boolean value is used to highlight basins and will prevent the highlight to be removed when the
-        user "mouseouts" of the basin.*/
-        var oldBasin: any;
-        if(basin != 'none') {
-          clickOnMapItem(basin.slice(basin.indexOf('(')+1, basin.indexOf(')')));
+        // Used to highlight basins and will prevent the highlight to be removed
+        // when the user "mouseouts" of the basin.
+        var basinSelected = false;
+        // Declaration that holds a previously selected basin's ID. Used for deselecting
+        // and toggling a feature's highlighting CSS.
+        var oldBasinID: any;
+
+        // If a basin's ID is explicitly given, it has been selected from the basin
+        // dropdown. Grab the basin ID from the full name string and send it to
+        // be used for feature highlighting/remove highlighting.
+        if (basinID) {
+          clickOnMapItem(basinID);
         }
 
+        /**
+         * When a basin is clicked, checks if a basin is already selected, deselects
+         * it, and highlights the new clicked layer/feature.
+         * @param Local_ID The basin's local ID.
+         */
         function clickOnMapItem(Local_ID: string) {
+
           // Once a basin has been clicked, use the eventsSubject Subject (which is also an observable and observer) and uses the
           // next method to send the selected basin's ID to the child side-nav component as an event.
           _this.eventsSubject.next(Local_ID);
-          if(basinSelected === true) {
-            var oldLayer = _this.basinBoundaryWithData.getLayer(oldBasin);
+          // If a basin is already selected, deselect and remove highlighting.
+          if (basinSelected === true) {
+            var oldLayer = _this.basinBoundaryWithData.getLayer(oldBasinID);
             oldLayer.feature.properties.hasBeenSelected = false;
             oldLayer.fireEvent('mouseout');
           }
-          var id = Local_ID;
-          oldBasin = Local_ID;
-          //get target layer by it's id
-          var layer = _this.basinBoundaryWithData.getLayer(id);
-          //fire event 'click' on target layer
+
+          oldBasinID = Local_ID;
+          var layer = _this.basinBoundaryWithData.getLayer(Local_ID);
+          // Fire event 'click' on target layer.
           layer.fireEvent('mouseover');
           layer.feature.properties.hasBeenSelected = true;
-          // select_basin_call = true;
+          // _this.selectBasinCall = true;
           basinSelected = true;
+
+          // Set the currently selected basin ID as a cookie.
+          _this.cookieService.put('basinSelected', Local_ID);
         }
       }
 
@@ -273,7 +281,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   /**
    * Controls the color of each basin depending on the Mean SME data value, as well as legend colors.
-   * @param d 
+   * @param start 
    * @returns 
    */
   public getColor(start: number) {
@@ -432,13 +440,6 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   ngOnInit(): void {
 
-    // Wait the refreshInterval, then keep waiting by the refreshInterval from then on.
-    // const delay = timer(30000, 30000);
-
-    // delay.subscribe(() => {
-    //   window.location.reload();
-    // });
-    
     // Set the pre-initialized appConfig JSON object to appConfig.
     this.appConfig = this.appService.getAppConfig();
 
@@ -458,21 +459,31 @@ export class MapComponent implements OnInit, OnDestroy {
       this.appService.setCurrDate(this.appService.getDates()[0]);
       // Initialize the map for the first time.
       if (this.appService.isInitMap() === true) {
-        // Set initMap to false.
         this.appService.mapCreated();
         this.appService.setLeafletConfig();
 
         // Initialize the Leaflet map with the current date.
         this.initMap();
-        // Build the map each update.
-        this.buildMap(this.appService.getCurrDate(), 'none', false);
+        // Build the map initially, and check if a basin had previously been selected
+        // and set as a cookie.
+        if (this.cookieService.get('basinSelected')) {
+          this.buildMap(this.appService.getCurrDate(), this.cookieService.get('basinSelected'));
+        } else {
+          this.buildMap(this.appService.getCurrDate());
+        }
       }
-      // Map has already been initialized.
+      // Map has already been initialized once. This is generally used when recreating
+      // the map when navigating from About, Data, etc.
       else {
         // Initialize the Leaflet map with the current date.
         this.initMap();
-        // Build the map each update.
-        this.buildMap(this.appService.getCurrDate(), 'none', false);
+        // Build the map initially, and check if a basin had previously been selected
+        // and set as a cookie.
+        if (this.cookieService.get('basinSelected')) {
+          this.buildMap(this.appService.getCurrDate(), this.cookieService.get('basinSelected'));
+        } else {
+          this.buildMap(this.appService.getCurrDate());
+        }
       }
     });
     
@@ -523,26 +534,29 @@ export class MapComponent implements OnInit, OnDestroy {
   YYYY-MM-DD. */
   // public showValue(newValue) {
   //   document.getElementById("range").innerHTML = newValue.substring(0,4) + "-" + newValue.substring(4,6) + "-" + newValue.substring(6);
-  //   this.buildMap(newValue, 'none', true);
+  //   this.buildMap(newValue, 'none');
   // }
 
   /**
-   * Changes which basin is currently highlighted on the map.
-   * @param basin 
+   * Changes which basin is currently highlighted on the map when a user selects
+   * it from the Select Basin dropdown in the Side Nav.
+   * @param basinID The basin's ID, used when setting up event handlers
+   * when rebuilding the map.
    */
-  public updateBasin(basin: string): void {
-    this.buildMap(this.appService.getCurrDate(), basin, true);
+  public updateBasin(basinID: string): void {
+    this.buildMap(this.appService.getCurrDate(), basinID);
   }
 
   /**
    * Deconstruct the hyphenated date format (xxxx-xx-xx) into a `ListOfDates.txt`
    * format (xxxxxxxx). Called when selecting a new date from the date
    * dropdown.
-   * @param date The hyphenated date string from the Date dropdown list.
+   * @param currentDate The hyphenated date string from the Date dropdown list
+   * that the user selected.
    */
-  public updateMapDate(date: string): void {
-    date = date.substring(0,4) + date.substring(5,7) + date.substring(8);
-    this.buildMap(date, 'none', true);
+  public updateMapDate(currentDate: string): void {
+    currentDate = currentDate.substring(0,4) + currentDate.substring(5,7) + currentDate.substring(8);
+    this.buildMap(currentDate);
   }
 
 }

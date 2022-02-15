@@ -105,7 +105,7 @@ export class AppService {
     var list = [];
     var basinsToDownload: string[] = [];
     var alreadyDownloaded: string[] = [];
-    for(var index in SNODAS_Geometry.features) {
+    for (var index in SNODAS_Geometry.features) {
       list[index] = (SNODAS_Geometry.features[index]["properties"]["LOCAL_NAME"] +
       " (" + SNODAS_Geometry.features[index]["properties"]["LOCAL_ID"] + ")");
 
@@ -375,7 +375,7 @@ export class AppService {
   }
 
   /**
-   * 
+   * Sets the initMap Service Class variable to false, as the map has been initialized.
    */
   public mapCreated(): void {
     this.initMap = false;
@@ -438,7 +438,7 @@ export class AppService {
     return new Date(parseInt(date.substring(0,4)), parseInt(date.substring(4,2)) - 1, parseInt(date.substring(6,2)));
   }
 
-  /** Sets the initial value for the Leaflet config object. */
+  /** Initializes the Leaflet config object. */
   public setLeafletConfig(): void {
     this.leafletConfig = JSON.parse(JSON.stringify(this.getAppConfig()));
   }
@@ -451,7 +451,7 @@ export class AppService {
   }
 
   /** Sets up every asynchronous call for static data retrieval to be put in a forkJoin. */
-  public setMapData(): any {
+  public setMapData(): Observable<any> {
     // Array to hold each Observable that needs to be subscribed to.
     var asyncData: Observable<any>[] = [];
     var infoString = 'Local Environment: ' + this.getDevEnv() + '. Retrieving dates from ';
@@ -461,6 +461,8 @@ export class AppService {
       asyncData.push(this.getPlainText(this.appConfig.datesLocalPath));
     } else {
       console.info(infoString + this.appConfig.datesURL);
+      // The t parameter is used for cache busting to make sure the most recent
+      // dates are retrieved.
       asyncData.push(this.getPlainText(this.appConfig.datesURL + '?t=' + Date.now()));
     }
 
