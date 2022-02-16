@@ -24,7 +24,8 @@ communicating to the user what the application's data currently looks like.
 * Converted the `copy-to-owf-amazon-s3.sh` file to `copy-to-owf-amazon-s3.bash` for newer
 features, and changed a few lines that Shellcheck recommended updating for POSIX compatibility.
 * Various functions in the Map Component `buildMap()` method was refactored and made less
-convoluted.
+convoluted. Reverted a change that introduced a bug by surrounding ${dryrun} in double
+quotes.
 * The `updateBasinFunction` event emitter was changed from sending a basin's full name to
 the basin's ID. This way, the Map Component didn't need logic to parse out the ID anymore.
 

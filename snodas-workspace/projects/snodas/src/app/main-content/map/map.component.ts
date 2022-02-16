@@ -321,7 +321,25 @@ export class MapComponent implements OnInit, OnDestroy {
       wheelPxPerZoomLevel: 150,
       zoomControl: false,
       zoomSnap: 0.1
-    }).setView([this.appConfig.lat, this.appConfig.long], this.appConfig.zoom);  
+    }).setView([this.appConfig.lat, this.appConfig.long], this.appConfig.zoom);
+
+  //   }).setView([
+  //     // this.cookieService.get('mapCenter') ? this.cookieService.get('mapCenter')['lat'] : this.appConfig.lat,
+  //     // this.cookieService.get('mapCenter') ? this.cookieService.get('mapCenter')['long'] : this.appConfig.long
+  //     this.appConfig.lat,
+  //     this.appConfig.long
+  //   ],
+  //   this.cookieService.get('zoomLevel') ? this.cookieService.get('zoomLevel') : this.appConfig.zoom
+  // );
+
+  // // Create an event listener that sets the zoomLevel as a cookie at the end of any zoom.
+  // this.mainMap
+  // .on('zoomend', () => {
+  //   this.cookieService.put('zoomLevel', Number(this.mainMap.getZoom()).toFixed(1));
+  // })
+  // .on('moveend', () => {
+  //   this.cookieService.put('mapCenter', this.mainMap.getCenter());
+  // });
 
     // The background layer for the map
     this.background = L.tileLayer(this.appConfig.tiles, {

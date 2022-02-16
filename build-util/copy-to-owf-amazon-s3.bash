@@ -360,7 +360,7 @@ syncFiles() {
   if [ "${operatingSystem}" = "cygwin" ] || [ "${operatingSystem}" = "linux" ]; then
     # aws is in a standard location such as /usr/bin/aws
     logInfo "Running aws s3 sync ${snodasDistAppFolder} ${s3FolderUrl} ${dryrun} --delete --profile ${awsProfile}"
-    aws s3 sync "${snodasDistAppFolder}" "${s3FolderUrl}" "${dryrun}" --delete --profile "${awsProfile}"
+    aws s3 sync "${snodasDistAppFolder}" "${s3FolderUrl}" ${dryrun} --delete --profile "${awsProfile}"
     errorCode=$?
     if [ ${errorCode} -ne 0 ]; then
       logError "Error code ${errorCode} from 'aws' command.  Exiting."
@@ -373,7 +373,7 @@ syncFiles() {
     # - TODO smalers 2019-01-04 could try to find where py thinks Python is installed but not sure how
     awsScript="${HOME}/AppData/Local/Programs/Python/Python37/scripts/aws"
     if [ -f "${awsScript}" ]; then
-      ${awsScript} s3 sync "${snodasDistAppFolder}" "${s3FolderUrl}" "${dryrun}" --delete --profile "${awsProfile}"
+      ${awsScript} s3 sync "${snodasDistAppFolder}" "${s3FolderUrl}" ${dryrun} --delete --profile "${awsProfile}"
       errorCode=$?
       if [ ${errorCode} -ne 0 ]; then
         logError "Error code ${errorCode} from 'aws' command.  Exiting."
@@ -467,7 +467,7 @@ snodasProjectFolder="${snodasRepoFolder}/snodas-workspace/projects/snodas"
 # Put 'dist' under the project folder, in case other projects have a distribution (general convention).
 snodasDistFolder="${snodasRepoFolder}/snodas-workspace/dist"
 # Application folder is the same as the 'dist' folder.
-snodasDistAppFolder="${snodasDistFolder}/snodas"
+snodasDistAppFolder="${snodasDistFolder}"
 # Application configuration file used to extract application version and Google Analytics tracking ID.
 # - TODO smalers 2021-04-29 need to implement application configuration file
 appConfigFile="${snodasProjectFolder}/src/assets/app-config.json"
